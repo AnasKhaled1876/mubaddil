@@ -42,6 +42,9 @@ choco install innosetup --no-progress -y
 $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
 if (-not (Test-Path $iscc)) { $iscc = "${env:ProgramFiles}\Inno Setup 6\ISCC.exe" }
 & $iscc windows\Mubaddil.iss
+if ($LASTEXITCODE -ne 0) {
+    throw "Inno Setup compile failed with exit code $LASTEXITCODE"
+}
 
 $pkg = Join-Path $Native "dist\Mubaddil"
 Copy-Item windows\AppxManifest.xml (Join-Path $pkg "AppxManifest.xml") -Force
