@@ -113,6 +113,14 @@ def run_tray() -> None:
     icon = pystray.Icon("mubaddil", _load_icon(), "مبدّل", menu)
     app_icon["icon"] = icon
 
+    def hud(text: str) -> None:
+        try:
+            icon.notify(text, "مبدّل")
+        except Exception:
+            return
+
+    ime.set_hud_handler(hud)
+
     if (
         sys.platform.startswith("win")
         and config.get("start_with_windows", True)

@@ -137,7 +137,21 @@ def _set_windows_lang(target: str, layout_id: str | None) -> bool:
     return True
 
 
+_hud_handler = None
+
+
+def set_hud_handler(handler) -> None:
+    global _hud_handler
+    _hud_handler = handler
+
+
 def show_hud(text: str) -> None:
+    if _hud_handler is not None:
+        try:
+            _hud_handler(text)
+            return
+        except Exception:
+            pass
     if sys.platform == "darwin":
         binary = ensure_mac_binary()
         if binary is not None:
@@ -156,15 +170,7 @@ def show_hud(text: str) -> None:
             ]
         )
         return
-    if sys.platform.startswith("win"):
-        subprocess.Popen(
-            [
-                "powershell",
-                "-NoProfile",
-                "-Command",
-                f"[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null; Write-Output {json.dumps(text)}",
-            ]
-        )
+    # Windows: never spawn PowerShell. Tray notify is registered from tray.py.
 
 
 def config_path() -> Path:
@@ -194,8 +200,8 @@ def load_config() -> dict:
         "enabled": True,
         "layout_id": detect_layout_id(),
         "sensitivity": "balanced",
-        "pause_ms": 700,
-        "idle_ms": 1100,
+        "pause_ms": 180,
+        "idle_ms": 600,
         "min_length": 3,
         "start_with_windows": True,
     }
@@ -204,7 +210,12 @@ def load_config() -> dict:
         return defaults
     try:
         stored = json.loads(path.read_text(encoding="utf-8"))
-        return {**defaults, **stored}
+        merged = {**defaults, **stored}
+        if stored.get("pause_ms") == 700:
+            merged["pause_ms"] = defaults["pause_ms"]
+        if stored.get("idle_ms") == 1100:
+            merged["idle_ms"] = defaults["idle_ms"]
+        return merged
     except (OSError, json.JSONDecodeError):
         return defaults
 

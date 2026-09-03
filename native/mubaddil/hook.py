@@ -145,8 +145,7 @@ class Watcher:
             return
         if self._pending:
             self._pending.cancel()
-        pause = self.config.get("pause_ms", 700) / 1000
-        ime.show_hud(f"{decision['word']} → {decision['converted']}")
+        pause = self.config.get("pause_ms", 180) / 1000
         self._pending = threading.Timer(
             pause, lambda: self._apply(decision, had_separator)
         )
@@ -198,7 +197,7 @@ class Watcher:
             for _ in range(delete_count):
                 self.controller.press(keyboard.Key.backspace)
                 self.controller.release(keyboard.Key.backspace)
-                time.sleep(0.008)
+                time.sleep(0.001)
             self.controller.type(typed)
             switched = ime.set_lang(target, self.config.get("layout_id"))
             self.last_fix = {
@@ -230,7 +229,7 @@ class Watcher:
             for _ in range(fix["delete_count"]):
                 self.controller.press(keyboard.Key.backspace)
                 self.controller.release(keyboard.Key.backspace)
-                time.sleep(0.008)
+                time.sleep(0.001)
             extra_space = fix["after"].endswith(" ") and not fix["before"].endswith(" ")
             restore = fix["before"] + (" " if extra_space else "")
             self.controller.type(restore)
