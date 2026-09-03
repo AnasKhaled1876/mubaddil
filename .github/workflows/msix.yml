@@ -26,6 +26,11 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          name: Mubaddil-setup
+          path: native/dist/Mubaddil-Setup.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
           name: Mubaddil-msix
           path: |
             native/dist/Mubaddil.msix

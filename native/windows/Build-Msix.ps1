@@ -37,6 +37,12 @@ Write-Host "Building Win32 exe..."
 Remove-Item -Recurse -Force dist, build -ErrorAction SilentlyContinue
 .\.venv\Scripts\pyinstaller.exe --noconfirm --clean --distpath dist --workpath build windows\Mubaddil.spec
 
+Write-Host "Building double-click Setup.exe..."
+choco install innosetup --no-progress -y
+$iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+if (-not (Test-Path $iscc)) { $iscc = "${env:ProgramFiles}\Inno Setup 6\ISCC.exe" }
+& $iscc windows\Mubaddil.iss
+
 $pkg = Join-Path $Native "dist\Mubaddil"
 Copy-Item windows\AppxManifest.xml (Join-Path $pkg "AppxManifest.xml") -Force
 $assets = Join-Path $pkg "Assets"
