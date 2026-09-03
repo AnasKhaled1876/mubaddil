@@ -6,7 +6,7 @@ from PIL import Image
 
 from . import engine, ime, startup
 from .hook import Watcher
-from .paths import bundle_dir, is_msix
+from .paths import bundle_dir, is_msix, log_exception
 
 ICON_CANDIDATES = [
     bundle_dir() / "assets" / "icon.png",
@@ -133,8 +133,12 @@ def run_tray() -> None:
         from . import window as _window  # noqa: F401
 
         has_window = True
-    except Exception:
+    except Exception as exc:
+        log_exception(exc)
         has_window = False
+        _windows_alert(
+            "مبدّل could not load its window. Look for the tray icon near the clock."
+        )
 
     if has_window:
         icon.run_detached()
@@ -142,7 +146,23 @@ def run_tray() -> None:
             from .window import open_settings
 
             open_settings(config, watcher, on_quit=quit_app)
-        except Exception:
+            return
+        except Exception as exc:
+            log_exception(exc)
+            _windows_alert(
+                "مبدّل could not open its window. Look for the tray icon near the clock."
+            )
             icon.run()
     else:
         icon.run()
+
+
+def _windows_alert(message: str) -> None:
+    if not sys.platform.startswith("win"):
+        return
+    try:
+        import ctypes
+
+        ctypes.windll.user32.MessageBoxW(0, message, "مبدّل", 0x00000040)
+    except Exception:
+        return

@@ -13,6 +13,28 @@ def bundle_dir() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
+def log_file() -> Path:
+    if sys.platform.startswith("win"):
+        base = os.environ.get("LOCALAPPDATA") or str(Path.home())
+        folder = Path(base) / "Mubaddil"
+    else:
+        folder = Path.home() / ".local" / "share" / "mubaddil"
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder / "error.log"
+
+
+def log_exception(exc: BaseException) -> None:
+    import traceback
+
+    try:
+        log_file().write_text(
+            "".join(traceback.format_exception(type(exc), exc, exc.__traceback__)),
+            encoding="utf-8",
+        )
+    except OSError:
+        return
+
+
 def is_msix() -> bool:
     if os.environ.get("PACKAGE_FAMILY_NAME"):
         return True

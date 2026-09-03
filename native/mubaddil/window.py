@@ -2,11 +2,34 @@
 
 from __future__ import annotations
 
+import os
+import sys
+from pathlib import Path
+
 import tkinter as tk
 from tkinter import ttk
 
 from . import engine, ime, startup
 from .paths import is_msix
+
+
+def _prepare_tk() -> None:
+    if not getattr(sys, "frozen", False):
+        return
+    roots = [
+        Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent)),
+        Path(sys.executable).resolve().parent,
+        Path(sys.executable).resolve().parent / "_internal",
+    ]
+    for root in roots:
+        if not root.exists():
+            continue
+        for init in root.rglob("init.tcl"):
+            os.environ.setdefault("TCL_LIBRARY", str(init.parent))
+            break
+        for tk_init in root.rglob("tk.tcl"):
+            os.environ.setdefault("TK_LIBRARY", str(tk_init.parent))
+            break
 
 INK = "#1a1916"
 PAPER = "#f3eadb"
@@ -27,12 +50,21 @@ def show() -> None:
 
 
 def open_settings(config: dict, watcher, on_quit=None) -> None:
+    _prepare_tk()
     root = tk.Tk()
     SESSION["root"] = root
     root.title("مبدّل — Mubaddil")
     root.configure(bg=PAPER)
     root.minsize(460, 520)
     root.geometry("520x580")
+    root.deiconify()
+    root.lift()
+    try:
+        root.attributes("-topmost", True)
+        root.after(800, lambda: root.attributes("-topmost", False))
+    except tk.TclError:
+        pass
+    root.focus_force()
 
     try:
         root.tk.call("tk", "scaling", 1.2)

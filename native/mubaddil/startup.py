@@ -28,11 +28,12 @@ def is_enabled() -> bool:
     return (folder / "Mubaddil.vbs").exists() or (folder / "Mubaddil.bat").exists()
 
 
-def _write_hidden_exe_launcher(path: Path) -> None:
+def _write_exe_launcher(path: Path, hidden: bool) -> None:
     exe = Path(sys.executable)
+    style = 0 if hidden else 1
     path.write_text(
         "Set sh = CreateObject(\"Wscript.Shell\")\r\n"
-        f'sh.Run """{exe}""", 0, False\r\n',
+        f'sh.Run """{exe}""", {style}, False\r\n',
         encoding="ascii",
         newline="\r\n",
     )
@@ -58,7 +59,7 @@ def set_enabled(enabled: bool) -> None:
     if frozen():
         if bat.exists():
             bat.unlink()
-        _write_hidden_exe_launcher(vbs)
+        _write_exe_launcher(vbs, hidden=True)
         return
     launcher = launcher_bat()
     bat.write_text(
@@ -72,10 +73,13 @@ def create_start_menu_shortcut() -> None:
         return
     start_menu_dir().mkdir(parents=True, exist_ok=True)
     if frozen():
-        _write_hidden_exe_launcher(start_menu_dir() / "Mubaddil.vbs")
-        old = start_menu_dir() / "Mubaddil.bat"
-        if old.exists():
-            old.unlink()
+        # Inno already creates a visible .lnk to the exe. Do not add a hidden VBS.
+        old_vbs = start_menu_dir() / "Mubaddil.vbs"
+        old_bat = start_menu_dir() / "Mubaddil.bat"
+        if old_vbs.exists():
+            old_vbs.unlink()
+        if old_bat.exists():
+            old_bat.unlink()
         return
     target = start_menu_dir() / "Mubaddil.bat"
     launcher = launcher_bat()
