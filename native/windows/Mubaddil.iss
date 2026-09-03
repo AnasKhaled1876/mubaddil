@@ -21,7 +21,7 @@ CloseApplications=yes
 CloseApplicationsFilter=Mubaddil.exe
 
 [Tasks]
-Name: uninstallprevious; Description: "Uninstall previous version / إزالة النسخة السابقة"; Flags: checked
+Name: uninstallprevious; Description: "Uninstall previous version / إزالة النسخة السابقة"
 
 [Messages]
 WelcomeLabel2=This installs مبدّل on this PC. It fixes typing in the wrong Arabic/English keyboard layout.%n%nNo admin password needed — double-click, Next, Finish.%n%nOn the next page, leave "Uninstall previous version" checked if an older copy is already installed.
