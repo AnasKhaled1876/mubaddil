@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>مبدّل — تجربة غلط الكيبورد</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="demo.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <p class="eyebrow">استكشاف لحل مشكلة الكيبورد في العالم العربي</p>
+        <h1>تكتب ثلاث ثواني… وبعدين تكتشف إن اللغة غلط.</h1>
+        <p class="lead">
+          مبدّل يراقب الكلمة، يوقفك لحظة عشان تلاحظ، يحوّل الحروف حسب زر الكيبورد
+          الفعلي، ويكمل على اللغة الصح — مع اختلاف ويندوز وماك.
+        </p>
+      </header>
+
+      <section class="panel">
+        <div class="toolbar">
+          <label>
+            الجهاز والتخطيط
+            <select id="layout"></select>
+          </label>
+          <label>
+            الحساسية
+            <select id="sensitivity">
+              <option value="conservative">هادية</option>
+              <option value="balanced" selected>متوازنة</option>
+              <option value="aggressive">سريعة</option>
+            </select>
+          </label>
+          <label class="check">
+            <input id="session" type="checkbox" checked />
+            كمّل التحويل بعد أول كلمة
+          </label>
+        </div>
+
+        <label class="field-label" for="box">اكتب هنا كأنك نسيت Alt+Shift</label>
+        <textarea
+          id="box"
+          dir="auto"
+          placeholder="جرّب: hgsghl ثم مسافة — المفروض تبقى السلام"
+        ></textarea>
+
+        <div id="status" class="status idle">في انتظار الكتابة</div>
+
+        <div class="examples">
+          <button type="button" data-sample="hgsghl ">hgsghl → السلام</button>
+          <button type="button" data-sample="ugd;l ">ugd;l → عليكم</button>
+          <button type="button" data-sample="lvpfh ">lvpfh → مرحبا</button>
+          <button type="button" data-sample="اثممخ ">اثممخ → hello</button>
+        </div>
+      </section>
+
+      <section class="notes">
+        <article>
+          <h2>اللي بيحصل</h2>
+          <ol>
+            <li>بتكتب كلمة والكيبورد على اللغة الغلط.</li>
+            <li>أول مسافة أو سكتة قصيرة: الكلمة تتعلّم بالبرتقالي.</li>
+            <li>تتحول للحروف الصح، والكيبورد الافتراضي يتبرمج للكلمات اللي بعدها.</li>
+            <li>Esc أو تراجع يرجع الكلمة. «الكيبورد اتظبط» يوقف التحويل التلقائي.</li>
+          </ol>
+        </article>
+        <article>
+          <h2>ليه الجهاز مهم</h2>
+          <p>
+            ويندوز عربي 101 هو الأكثر في الشركات. 102 قريب منه إلا الذ والعلامات.
+            ماك عنده Arabic - PC (زي ويندوز) وArabic الأصلي اللي قاعته مختلفة:
+            ظ ط ذ د ز ر و مش في نفس الزر.
+          </p>
+          <p>
+            إضافة الكروم تصلّح النص في المتصفح. تبديل لغة ويندوز نفسه (ARA/ENG)
+            يحتاج Companion صغير — المتصفح ممنوع يغيّر لغة النظام لوحده.
+          </p>
+        </article>
+      </section>
+    </div>
+
+    <div id="banner" hidden></div>
+    <div id="toast" hidden></div>
+
+    <script src="../extension/engine/layouts.js"></script>
+    <script src="../extension/engine/dictionaries.js"></script>
+    <script src="../extension/engine/convert.js"></script>
+    <script src="../extension/engine/detect.js"></script>
+    <script src="../extension/engine/controller.js"></script>
+    <script src="demo.js"></script>
+  </body>
+</html>

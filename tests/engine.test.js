@@ -1,0 +1,54 @@
+const fs = require("fs");
+const path = require("path");
+const vm = require("vm");
+
+const root = path.join(__dirname, "..", "extension", "engine");
+const context = { console, globalThis: {} };
+context.globalThis = context;
+vm.createContext(context);
+
+for (const file of ["layouts.js", "dictionaries.js", "convert.js", "detect.js", "controller.js"]) {
+  vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context);
+}
+
+const KF = context.KeyboardFix;
+const fails = [];
+
+function assert(name, actual, expected) {
+  if (actual !== expected) {
+    fails.push(`${name}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+  }
+}
+
+assert("سلام from english", KF.convert("hgsghl", "windows-101"), "السلام");
+assert("عليكم from english", KF.convert("ugd;l", "windows-101"), "عليكم");
+assert("مرحبا from english", KF.convert("lvpfh", "windows-101"), "مرحبا");
+assert("hello from arabic", KF.convert("اثممخ", "windows-101"), "hello");
+assert("ما from lh", KF.convert("lh", "windows-101"), "ما");
+
+const greeting = KF.shouldConvert("hgsghl", "windows-101");
+assert("detect السلام", greeting.convert && greeting.converted === "السلام" ? "yes" : "no", "yes");
+
+const alaykum = KF.shouldConvert("ugd;l", "windows-101");
+assert("detect عليكم keeps semicolon letter", alaykum.convert && alaykum.converted === "عليكم" ? "yes" : "no", "yes");
+
+const found = KF.lastWordAt("السلام ugd;l ", 13);
+assert("last word includes ;", found.word, "ugd;l");
+
+const hello = KF.shouldConvert("hello", "windows-101");
+assert("do not convert hello", hello.convert ? "yes" : "no", "no");
+
+const salaam = KF.shouldConvert("السلام", "windows-101");
+assert("do not convert real arabic", salaam.convert ? "yes" : "no", "no");
+
+const macZ = KF.convert("z", "mac-arabic");
+const winZ = KF.convert("z", "windows-101");
+assert("mac z is ظ", macZ, "ظ");
+assert("windows z is ئ", winZ, "ئ");
+
+if (fails.length) {
+  console.error(fails.join("\n"));
+  process.exit(1);
+}
+
+console.log("engine tests passed");

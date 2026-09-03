@@ -1,0 +1,82 @@
+.mubaddil-wrong {
+  outline: 2px solid #c45c26 !important;
+  outline-offset: 2px !important;
+  transition: outline-color 160ms ease;
+}
+
+.mubaddil-fixed {
+  outline: 2px solid #1f6b4a !important;
+  outline-offset: 2px !important;
+}
+
+#mubaddil-toast,
+#mubaddil-banner {
+  position: fixed;
+  z-index: 2147483646;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+  font-family: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+}
+
+#mubaddil-toast.is-visible,
+#mubaddil-banner.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+#mubaddil-toast {
+  bottom: 24px;
+}
+
+#mubaddil-banner {
+  top: 16px;
+}
+
+.mubaddil-toast-card,
+#mubaddil-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1916;
+  color: #f4efe6;
+  border-radius: 999px;
+  padding: 10px 12px 10px 16px;
+  box-shadow: 0 12px 40px rgba(26, 25, 22, 0.28);
+  font-size: 13px;
+}
+
+.mubaddil-toast-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mubaddil-toast-copy strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mubaddil-toast-copy span,
+#mubaddil-banner span {
+  opacity: 0.9;
+}
+
+#mubaddil-toast button,
+#mubaddil-banner button {
+  border: 0;
+  background: #f4efe6;
+  color: #1a1916;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#mubaddil-banner b {
+  color: #e3c38a;
+}

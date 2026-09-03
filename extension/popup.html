@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>مبدّل</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>مبدّل</h1>
+      <p>يوقفك لحظة لما تكتب بالكيبورد الغلط، ويحوّل الحروف.</p>
+    </header>
+    <label class="toggle">
+      <input id="enabled" type="checkbox" />
+      <span>شغّال</span>
+    </label>
+    <label>
+      تخطيط الكيبورد
+      <select id="layoutId"></select>
+    </label>
+    <p class="hint">
+      المتصفح يقدر يصلّح النص. تبديل لغة ويندوز نفسه يحتاج Win+Space — أو Companion لاحقاً.
+    </p>
+    <a href="options.html" target="_blank">إعدادات أكثر</a>
+    <script src="engine/layouts.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

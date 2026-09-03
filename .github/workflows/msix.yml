@@ -1,0 +1,33 @@
+name: Build Windows MSIX
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "native/**"
+      - ".github/workflows/msix.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  msix:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build and sign MSIX
+        shell: pwsh
+        run: ./native/windows/Build-Msix.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mubaddil-msix
+          path: |
+            native/dist/Mubaddil.msix
+            native/dist/Mubaddil.cer
+            native/dist/Install-Sideload.ps1

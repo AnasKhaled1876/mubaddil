@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+native/bin/
+native/dist/
+native/build/
+.DS_Store
