@@ -1,14 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_submodules
 
-hiddenimports = collect_submodules("pynput") + collect_submodules("pystray") + [
-    "tkinter",
-    "tkinter.ttk",
-    "PIL._tkinter_finder",
-]
+hiddenimports = (
+    collect_submodules("pynput")
+    + collect_submodules("pystray")
+    + collect_submodules("mubaddil")
+    + [
+        "tkinter",
+        "tkinter.ttk",
+        "PIL._tkinter_finder",
+    ]
+)
 
 a = Analysis(
-    ["../mubaddil/__main__.py"],
+    ["launch.py"],
     pathex=[".."],
     binaries=[],
     datas=[("../assets/icon.png", "assets")],

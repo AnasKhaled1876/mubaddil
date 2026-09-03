@@ -1,5 +1,10 @@
 import argparse
 import sys
+from pathlib import Path
+
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    __package__ = "mubaddil"
 
 from . import engine, ime
 
