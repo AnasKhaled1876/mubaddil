@@ -1,11 +1,27 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_submodules
+import os
+import sys
+from PyInstaller.utils.hooks import collect_all, collect_submodules
+
+native_dir = os.path.abspath(os.path.join(SPECPATH, ".."))
+sys.path.insert(0, native_dir)
+
+mubaddil_datas, mubaddil_binaries, mubaddil_hidden = collect_all("mubaddil")
 
 hiddenimports = (
     collect_submodules("pynput")
     + collect_submodules("pystray")
-    + collect_submodules("mubaddil")
+    + mubaddil_hidden
     + [
+        "mubaddil",
+        "mubaddil.__main__",
+        "mubaddil.engine",
+        "mubaddil.ime",
+        "mubaddil.tray",
+        "mubaddil.hook",
+        "mubaddil.window",
+        "mubaddil.startup",
+        "mubaddil.paths",
         "tkinter",
         "tkinter.ttk",
         "PIL._tkinter_finder",
@@ -13,10 +29,10 @@ hiddenimports = (
 )
 
 a = Analysis(
-    ["launch.py"],
-    pathex=[".."],
-    binaries=[],
-    datas=[("../assets/icon.png", "assets")],
+    [os.path.join(SPECPATH, "launch.py")],
+    pathex=[native_dir],
+    binaries=mubaddil_binaries,
+    datas=mubaddil_datas + [(os.path.join(native_dir, "assets", "icon.png"), "assets")],
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
@@ -36,7 +52,7 @@ exe = EXE(
     strip=False,
     upx=True,
     console=False,
-    icon="../assets/icon.ico",
+    icon=os.path.join(native_dir, "assets", "icon.ico"),
 )
 coll = COLLECT(
     exe,
