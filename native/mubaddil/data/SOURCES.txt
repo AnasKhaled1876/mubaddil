@@ -1,0 +1,7 @@
+Arabic words: top frequency types from hermitdave/FrequencyWords (OpenSubtitles-derived),
+https://github.com/hermitdave/FrequencyWords — content/2016/ar/ar_50k.txt (top ~20k filtered).
+
+English words: first20hours/google-10000-english (Google Trillion Word Corpus),
+https://github.com/first20hours/google-10000-english — google-10000-english-usa.txt
+
+Greeting/starter seeds for Arabic and English are always included.

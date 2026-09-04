@@ -52,4 +52,18 @@ assert_eq(
 assert_eq("mac z is ظ", engine.convert("z", "mac-arabic"), "ظ")
 assert_eq("windows z is ئ", engine.convert("z", "windows-101"), "ئ")
 
+assert_eq("arabic dictionary loaded", len(engine.ARABIC_WORD_SET) > 5000, True)
+assert_eq("english dictionary loaded", len(engine.ENGLISH_WORD_SET) > 5000, True)
+assert_eq("freq word في present", "في" in engine.ARABIC_WORD_SET, True)
+assert_eq("freq word please present", "please" in engine.ENGLISH_WORD_SET, True)
+
+# A common Arabic word from FrequencyWords should convert from wrong Latin keys
+# when remapped form is in the dictionary (e.g. من from ug on windows-101: u->ع g->ل — not من).
+# Spot-check that dictionary-backed detection still works for greetings after expand.
+assert_eq(
+    "expanded dict still detects السلام",
+    engine.should_convert("hgsghl", "windows-101")["convert"],
+    True,
+)
+
 print("python engine tests passed")

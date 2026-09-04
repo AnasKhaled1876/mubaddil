@@ -1,14 +1,55 @@
 import re
 import sys
+from pathlib import Path
 
-ARABIC_WORDS = """
+_SEED_ARABIC = """
 السلام عليكم ورحمة وبركاته مرحبا اهلا اهلاً سهلا شكرا شكراً عفوا نعم لا من فضلك لو سمحت
 صباح الخير مساء الحمد لله إن شاء الله ما شاء الله الحمدلله يارب يا رب
 """.split()
 
-ENGLISH_WORDS = """
+_SEED_ENGLISH = """
 hello hi hey thanks thank please yes okay ok good morning evening welcome sorry the and
 """.split()
+
+
+def _data_dirs() -> list[Path]:
+    here = Path(__file__).resolve().parent
+    dirs = [here / "data"]
+    try:
+        from .paths import bundle_dir
+
+        root = bundle_dir()
+        dirs.extend(
+            [
+                root / "mubaddil" / "data",
+                root / "data",
+                Path(sys.executable).resolve().parent / "mubaddil" / "data",
+            ]
+        )
+    except Exception:
+        pass
+    return dirs
+
+
+def _load_word_file(filename: str, fallback: list[str]) -> list[str]:
+    for folder in _data_dirs():
+        path = folder / filename
+        try:
+            if path.is_file():
+                words = [
+                    line.strip()
+                    for line in path.read_text(encoding="utf-8").splitlines()
+                    if line.strip() and not line.startswith("#")
+                ]
+                if words:
+                    return words
+        except OSError:
+            continue
+    return list(fallback)
+
+
+ARABIC_WORDS = _load_word_file("arabic_words.txt", _SEED_ARABIC)
+ENGLISH_WORDS = _load_word_file("english_words.txt", _SEED_ENGLISH)
 WINDOWS_101_EN_TO_AR = {
     "`": "ذ",
     "1": "1",
