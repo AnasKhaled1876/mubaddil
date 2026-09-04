@@ -23,11 +23,31 @@ assert_eq("detect السلام", greeting["convert"] and greeting["converted"] =
 alaykum = engine.should_convert("ugd;l", "windows-101")
 assert_eq("detect عليكم", alaykum["convert"] and alaykum["converted"] == "عليكم", True)
 
+hello_ar = engine.should_convert("اثممخ", "windows-101")
+assert_eq("detect hello", hello_ar["convert"] and hello_ar["converted"] == "hello", True)
+
 hello = engine.should_convert("hello", "windows-101")
 assert_eq("do not convert hello", hello["convert"], False)
 
 salaam = engine.should_convert("السلام", "windows-101")
 assert_eq("do not convert real arabic", salaam["convert"], False)
+
+noise = engine.should_convert("qwerty", "windows-101")
+assert_eq("reject non-dictionary latin", noise["convert"], False)
+
+opening = engine.should_convert_opening(["hgsghl", "ugd;l"], "windows-101")
+assert_eq(
+    "opening phrase",
+    opening["convert"] and opening["converted"] == "السلام عليكم",
+    True,
+)
+
+opening_en = engine.should_convert_opening(["اثممخ"], "windows-101")
+assert_eq(
+    "opening english",
+    opening_en["convert"] and opening_en["converted"] == "hello",
+    True,
+)
 
 assert_eq("mac z is ظ", engine.convert("z", "mac-arabic"), "ظ")
 assert_eq("windows z is ئ", engine.convert("z", "windows-101"), "ئ")

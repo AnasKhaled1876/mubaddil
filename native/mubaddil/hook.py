@@ -6,21 +6,25 @@ from pynput import keyboard
 from . import engine, ime
 
 SEPARATOR_CHARS = set(" \t!?()<>")
+MAX_OPENING_WORDS = 2
 
 
 class Watcher:
     def __init__(self, config: dict):
         self.config = config
         self.buffer: list[str] = []
+        self.opening_words: list[str] = []
         self.injecting = False
         self.controller = keyboard.Controller()
         self.listener: keyboard.Listener | None = None
         self._idle: threading.Timer | None = None
         self._pending: threading.Timer | None = None
         self._modifiers = set()
-        self.session: dict | None = None
         self.last_fix: dict | None = None
         self.lock = threading.Lock()
+        self.armed_focus: str | None = None
+        self.field_done = False
+        self.opening_had_separator = False
 
     def start(self) -> None:
         self.listener = keyboard.Listener(
@@ -57,6 +61,23 @@ class Watcher:
     def on_release(self, key) -> None:
         self._modifiers.discard(key)
 
+    def _refresh_field(self) -> None:
+        token = ime.focus_token()
+        if token != self.armed_focus:
+            self.armed_focus = token
+            self.field_done = False
+            self.opening_words = []
+            self.opening_had_separator = False
+            self.buffer.clear()
+            self._cancel_timers()
+
+    def _mark_field_done(self) -> None:
+        self.field_done = True
+        self.opening_words = []
+        self.opening_had_separator = False
+        self.buffer.clear()
+        self._cancel_timers()
+
     def on_press(self, key) -> None:
         if self.injecting:
             return
@@ -74,6 +95,8 @@ class Watcher:
             self._modifiers.add(key)
             return
 
+        self._refresh_field()
+
         if self._mods_blocking():
             if self._is_undo(key):
                 self.undo()
@@ -82,9 +105,18 @@ class Watcher:
             return
 
         if key == keyboard.Key.esc:
-            self.session = None
             self.buffer.clear()
+            self.opening_words = []
+            self.opening_had_separator = False
             self._cancel_timers()
+            return
+
+        if self.field_done:
+            if key == keyboard.Key.backspace:
+                return
+            ch = getattr(key, "char", None)
+            if ch or key in {keyboard.Key.space, keyboard.Key.tab}:
+                return
             return
 
         if key == keyboard.Key.backspace:
@@ -95,7 +127,7 @@ class Watcher:
         if key in {keyboard.Key.space, keyboard.Key.tab}:
             word = "".join(self.buffer)
             self.buffer.clear()
-            self._schedule(word, had_separator=True)
+            self._complete_word(word, had_separator=True)
             return
 
         ch = getattr(key, "char", None)
@@ -104,7 +136,7 @@ class Watcher:
         if ch in SEPARATOR_CHARS:
             word = "".join(self.buffer)
             self.buffer.clear()
-            self._schedule(word, had_separator=True)
+            self._complete_word(word, had_separator=True)
             return
         self.buffer.append(ch)
         self._schedule_idle()
@@ -123,28 +155,68 @@ class Watcher:
     def _schedule_idle(self) -> None:
         if self._idle:
             self._idle.cancel()
-        delay = self.config.get("idle_ms", 1100) / 1000
+        delay = self.config.get("idle_ms", 600) / 1000
         self._idle = threading.Timer(delay, self._idle_fire)
         self._idle.daemon = True
         self._idle.start()
 
     def _idle_fire(self) -> None:
         with self.lock:
+            if self.field_done:
+                return
             word = "".join(self.buffer)
+            opening = list(self.opening_words)
         if word:
-            self._schedule(word, had_separator=False)
+            # Idle mid-word: treat buffer as next opening word without separator.
+            self._complete_word(word, had_separator=False, clear_buffer=True)
+            return
+        if opening:
+            self._evaluate_opening(had_separator=self.opening_had_separator)
 
-    def _schedule(self, word: str, had_separator: bool) -> None:
+    def _complete_word(
+        self, word: str, had_separator: bool, clear_buffer: bool = False
+    ) -> None:
+        if clear_buffer:
+            self.buffer.clear()
         if self._idle:
             self._idle.cancel()
             self._idle = None
         if not self.config.get("enabled", True):
             return
-        decision = self._inspect(word)
-        if not decision.get("convert"):
+        if self.field_done:
             return
+        if word.strip():
+            if len(self.opening_words) >= MAX_OPENING_WORDS:
+                self._mark_field_done()
+                return
+            self.opening_words.append(word.strip())
+            self.opening_had_separator = had_separator
+        if not self.opening_words:
+            return
+        if len(self.opening_words) >= MAX_OPENING_WORDS:
+            self._evaluate_opening(had_separator=self.opening_had_separator)
+            return
+        # One word so far: wait for a second word, or idle to decide on the first.
+        self._schedule_idle()
+
+    def _evaluate_opening(self, had_separator: bool) -> None:
         if self._pending:
             self._pending.cancel()
+            self._pending = None
+        words = list(self.opening_words)
+        if not words:
+            return
+        layout_id = self.config.get("layout_id") or engine.guess_default_layout()
+        decision = engine.should_convert_opening(
+            words,
+            layout_id,
+            {
+                "min_length": self.config.get("min_length", 3),
+            },
+        )
+        if not decision.get("convert"):
+            self._mark_field_done()
+            return
         pause = self.config.get("pause_ms", 180) / 1000
         self._pending = threading.Timer(
             pause, lambda: self._apply(decision, had_separator)
@@ -152,42 +224,33 @@ class Watcher:
         self._pending.daemon = True
         self._pending.start()
 
-    def _inspect(self, word: str) -> dict:
-        layout_id = self.config.get("layout_id") or engine.guess_default_layout()
-        if self.session:
-            converted = engine.convert(word, layout_id, self.session["direction"])
-            if converted != word:
-                return {
-                    "convert": True,
-                    "word": word,
-                    "converted": converted,
-                    "direction": self.session["direction"],
-                    "target_lang": self.session["target_lang"],
-                    "reason": "session",
-                }
-        return engine.should_convert(
-            word,
-            layout_id,
-            {
-                "min_length": self.config.get("min_length", 3),
-                "sensitivity": self.config.get("sensitivity", "balanced"),
-            },
-        )
-
     def _apply(self, decision: dict, had_separator: bool) -> None:
         with self.lock:
+            if self.field_done:
+                return
             still = "".join(self.buffer)
+            original = decision["word"]
+            converted = decision["converted"]
             if had_separator:
                 suffix = still
-                delete_count = len(decision["word"]) + 1 + len(suffix)
-                typed = decision["converted"] + " " + suffix
+                delete_count = len(original) + 1 + len(suffix)
+                typed = converted + " " + suffix
                 self.buffer = list(suffix)
             else:
-                if still != decision["word"]:
+                if still and still != decision["words"][-1]:
+                    # User kept typing a different continuation; abort this apply.
                     return
-                delete_count = len(decision["word"])
-                typed = decision["converted"]
-                self.buffer.clear()
+                if still == decision["words"][-1]:
+                    delete_count = len(original)
+                    typed = converted
+                    self.buffer.clear()
+                else:
+                    delete_count = len(original)
+                    typed = converted
+                    self.buffer.clear()
+            self.opening_words = []
+            self.opening_had_separator = False
+
         previous = ime.current_lang()
         target = decision.get("target_lang") or (
             "ar" if decision.get("direction") == "en-to-ar" else "en"
@@ -199,23 +262,15 @@ class Watcher:
                 self.controller.release(keyboard.Key.backspace)
                 time.sleep(0.001)
             self.controller.type(typed)
-            switched = ime.set_lang(target, self.config.get("layout_id"))
+            ime.set_lang(target, self.config.get("layout_id"))
             self.last_fix = {
-                "before": decision["word"],
+                "before": original,
                 "after": typed,
                 "previous_lang": previous,
                 "target_lang": target,
                 "delete_count": len(typed),
             }
-            if switched:
-                self.session = None
-                ime.show_hud(f"اتظبطت → {decision['converted']}")
-            else:
-                self.session = {
-                    "direction": decision.get("direction"),
-                    "target_lang": target,
-                }
-                ime.show_hud(f"اتظبطت → {decision['converted']} — بدّل اللغة يدويًا")
+            self.field_done = True
         finally:
             time.sleep(0.05)
             self.injecting = False
@@ -236,7 +291,7 @@ class Watcher:
             if fix.get("previous_lang"):
                 ime.set_lang(fix["previous_lang"], self.config.get("layout_id"))
             self.last_fix = None
-            self.session = None
+            self.field_done = True
         finally:
             time.sleep(0.05)
             self.injecting = False

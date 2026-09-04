@@ -56,6 +56,13 @@
     return score;
   }
 
+  function inDictionary(word, lang) {
+    const clean = normalize(word);
+    if (!clean) return false;
+    if (lang === "ar") return KeyboardFix.ARABIC_WORDS.has(clean);
+    return KeyboardFix.ENGLISH_WORDS.has(clean.toLowerCase());
+  }
+
   function wordScore(word, lang) {
     const clean = normalize(word);
     if (!clean) return 0;
@@ -94,32 +101,24 @@
       convertedScore,
       delta: convertedScore - originalScore,
       direction: originalLang === "en" ? "en-to-ar" : "ar-to-en",
+      dictHit: inDictionary(converted, convertedLang),
+      alreadyValid: inDictionary(clean, originalLang),
     };
   }
 
   function shouldConvert(word, layoutId, options = {}) {
     const minLength = options.minLength ?? 3;
-    const sensitivity = options.sensitivity ?? "balanced";
-    const thresholds = {
-      conservative: 8,
-      balanced: 5,
-      aggressive: 3,
-    };
-    const needed = thresholds[sensitivity] ?? thresholds.balanced;
     const analysis = analyzeWord(word, layoutId);
 
     if (analysis.action !== "score") return { ...analysis, convert: false };
     if (normalize(analysis.word).length < minLength) {
       return { ...analysis, convert: false, reason: "too-short" };
     }
-    if (analysis.originalScore >= 10 && analysis.delta < 4) {
+    if (analysis.alreadyValid) {
       return { ...analysis, convert: false, reason: "already-valid" };
     }
-    if (analysis.convertedScore < 4) {
-      return { ...analysis, convert: false, reason: "weak-target" };
-    }
-    if (analysis.delta < needed) {
-      return { ...analysis, convert: false, reason: "low-confidence" };
+    if (!analysis.dictHit) {
+      return { ...analysis, convert: false, reason: "not-in-dictionary" };
     }
 
     return {

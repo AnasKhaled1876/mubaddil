@@ -141,36 +141,70 @@ _hud_handler = None
 
 
 def set_hud_handler(handler) -> None:
+    """Kept for API compatibility; correction HUD/notifications are disabled."""
     global _hud_handler
     _hud_handler = handler
 
 
 def show_hud(text: str) -> None:
-    if _hud_handler is not None:
-        try:
-            _hud_handler(text)
-            return
-        except Exception:
-            pass
+    """No-op: do not show notifications or HUDs on Windows or Mac."""
+    return
+
+
+def focus_token() -> str:
+    """Stable-ish id for the current focused control / window."""
+    if sys.platform.startswith("win"):
+        return _windows_focus_token()
     if sys.platform == "darwin":
-        binary = ensure_mac_binary()
-        if binary is not None:
-            subprocess.Popen(
-                [str(binary), "hud", text],
-                start_new_session=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            return
-        subprocess.Popen(
-            [
-                "osascript",
-                "-e",
-                f'display notification {json.dumps(text)} with title "مبدّل"',
-            ]
-        )
-        return
-    # Windows: never spawn PowerShell. Tray notify is registered from tray.py.
+        return _mac_focus_token()
+    return "default"
+
+
+def _windows_focus_token() -> str:
+    import ctypes
+    from ctypes import wintypes
+
+    class RECT(ctypes.Structure):
+        _fields_ = [
+            ("left", wintypes.LONG),
+            ("top", wintypes.LONG),
+            ("right", wintypes.LONG),
+            ("bottom", wintypes.LONG),
+        ]
+
+    class GUITHREADINFO(ctypes.Structure):
+        _fields_ = [
+            ("cbSize", wintypes.DWORD),
+            ("flags", wintypes.DWORD),
+            ("hwndActive", wintypes.HWND),
+            ("hwndFocus", wintypes.HWND),
+            ("hwndCapture", wintypes.HWND),
+            ("hwndMenuOwner", wintypes.HWND),
+            ("hwndMoveSize", wintypes.HWND),
+            ("hwndCaret", wintypes.HWND),
+            ("rcCaret", RECT),
+        ]
+
+    user32 = ctypes.windll.user32
+    info = GUITHREADINFO()
+    info.cbSize = ctypes.sizeof(GUITHREADINFO)
+    foreground = user32.GetForegroundWindow()
+    tid = user32.GetWindowThreadProcessId(foreground, None)
+    focus = 0
+    if user32.GetGUIThreadInfo(tid, ctypes.byref(info)):
+        focus = int(info.hwndFocus or 0) or int(info.hwndCaret or 0)
+    return f"win:{int(foreground or 0)}:{focus}"
+
+
+def _mac_focus_token() -> str:
+    try:
+        result = mac_run("focus-id")
+        token = (result.stdout or "").strip()
+        if result.returncode == 0 and token:
+            return f"mac:{token}"
+    except Exception:
+        pass
+    return "mac:unknown"
 
 
 def config_path() -> Path:

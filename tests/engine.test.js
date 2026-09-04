@@ -35,11 +35,17 @@ assert("detect عليكم keeps semicolon letter", alaykum.convert && alaykum.co
 const found = KF.lastWordAt("السلام ugd;l ", 13);
 assert("last word includes ;", found.word, "ugd;l");
 
+const helloAr = KF.shouldConvert("اثممخ", "windows-101");
+assert("detect hello", helloAr.convert && helloAr.converted === "hello" ? "yes" : "no", "yes");
+
 const hello = KF.shouldConvert("hello", "windows-101");
 assert("do not convert hello", hello.convert ? "yes" : "no", "no");
 
 const salaam = KF.shouldConvert("السلام", "windows-101");
 assert("do not convert real arabic", salaam.convert ? "yes" : "no", "no");
+
+const noise = KF.shouldConvert("qwerty", "windows-101");
+assert("reject non-dictionary latin", noise.convert ? "yes" : "no", "no");
 
 const macZ = KF.convert("z", "mac-arabic");
 const winZ = KF.convert("z", "windows-101");

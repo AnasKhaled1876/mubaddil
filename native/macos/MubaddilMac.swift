@@ -137,9 +137,49 @@ func promptTrust() -> Bool {
     return AXIsProcessTrustedWithOptions(options)
 }
 
+func axString(_ element: AXUIElement, _ attribute: CFString) -> String {
+    var value: CFTypeRef?
+    let status = AXUIElementCopyAttributeValue(element, attribute, &value)
+    guard status == .success, let value else { return "" }
+    if CFGetTypeID(value) == CFStringGetTypeID() {
+        return (value as! CFString) as String
+    }
+    return String(describing: value)
+}
+
+func focusID() -> String {
+    let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
+    let systemWide = AXUIElementCreateSystemWide()
+    var focusedRef: CFTypeRef?
+    let status = AXUIElementCopyAttributeValue(
+        systemWide,
+        kAXFocusedUIElementAttribute as CFString,
+        &focusedRef
+    )
+    guard status == .success, let focusedRef else {
+        return "app:\(pid)"
+    }
+    let focused = focusedRef as! AXUIElement
+    var focusedPid: pid_t = 0
+    AXUIElementGetPid(focused, &focusedPid)
+    let role = axString(focused, kAXRoleAttribute as CFString)
+    let title = axString(focused, kAXTitleAttribute as CFString)
+    let desc = axString(focused, kAXDescriptionAttribute as CFString)
+    var posRef: CFTypeRef?
+    var pos = "0,0"
+    if AXUIElementCopyAttributeValue(focused, kAXPositionAttribute as CFString, &posRef) == .success,
+       let posRef {
+        var point = CGPoint.zero
+        if AXValueGetValue(posRef as! AXValue, .cgPoint, &point) {
+            pos = "\(Int(point.x)),\(Int(point.y))"
+        }
+    }
+    return "\(focusedPid)|\(role)|\(title)|\(desc)|\(pos)"
+}
+
 let args = Array(CommandLine.arguments.dropFirst())
 if args.isEmpty {
-    fputs("usage: mubaddil-mac ime list|get|set ar|en [pc|native] | hud TEXT | trust\n", stderr)
+    fputs("usage: mubaddil-mac ime list|get|set ar|en [pc|native] | focus-id | hud TEXT | trust\n", stderr)
     exit(1)
 }
 
@@ -159,6 +199,9 @@ case "ime":
     default:
         exit(1)
     }
+case "focus-id":
+    print(focusID())
+    exit(0)
 case "hud":
     showHUD(args.dropFirst().joined(separator: " "))
 case "trust":
