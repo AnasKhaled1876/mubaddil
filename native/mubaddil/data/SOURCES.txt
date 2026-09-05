@@ -21,4 +21,7 @@ English
   https://github.com/first20hours/google-10000-english
   google-10000-english-usa.txt
 
+Arabic personal names
+- native/mubaddil/data/arabic_names.txt (أنس خالد محمد صابر and common first names)
+
 Greeting / Egyptian chat seeds are always included.

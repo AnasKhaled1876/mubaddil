@@ -48,7 +48,21 @@ def _load_word_file(filename: str, fallback: list[str]) -> list[str]:
     return list(fallback)
 
 
-ARABIC_WORDS = _load_word_file("arabic_words.txt", _SEED_ARABIC)
+def _merge_word_lists(*lists: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for words in lists:
+        for word in words:
+            if word and word not in seen:
+                seen.add(word)
+                out.append(word)
+    return out
+
+
+ARABIC_WORDS = _merge_word_lists(
+    _load_word_file("arabic_words.txt", _SEED_ARABIC),
+    _load_word_file("arabic_names.txt", []),
+)
 ENGLISH_WORDS = _load_word_file("english_words.txt", _SEED_ENGLISH)
 WINDOWS_101_EN_TO_AR = {
     "`": "ذ",

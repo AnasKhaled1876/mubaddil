@@ -51,6 +51,10 @@ def main() -> int:
         print("ok" if ok else "failed")
         return 0 if ok else 1
     if command == "run":
+        from .instance import acquire_single_instance
+
+        if not acquire_single_instance():
+            return 0
         if sys.platform == "darwin" and not ime.prompt_mac_accessibility():
             print(
                 "Allow Mubaddil in System Settings → Privacy & Security → Accessibility, then run again.",

@@ -6,7 +6,7 @@ from pynput import keyboard
 from . import engine, ime
 
 SEPARATOR_CHARS = set(" \t!?()<>")
-MAX_OPENING_WORDS = 2
+MAX_OPENING_WORDS = 4
 
 
 class Watcher:
@@ -171,7 +171,10 @@ class Watcher:
             self._complete_word(word, had_separator=False, clear_buffer=True)
             return
         if opening:
-            self._evaluate_opening(had_separator=self.opening_had_separator)
+            self._evaluate_opening(
+                had_separator=self.opening_had_separator,
+                wait_for_more=len(opening) < MAX_OPENING_WORDS,
+            )
 
     def _complete_word(
         self, word: str, had_separator: bool, clear_buffer: bool = False
@@ -194,12 +197,14 @@ class Watcher:
         if not self.opening_words:
             return
         if len(self.opening_words) >= MAX_OPENING_WORDS:
-            self._evaluate_opening(had_separator=self.opening_had_separator)
+            self._evaluate_opening(
+                had_separator=self.opening_had_separator, wait_for_more=False
+            )
             return
-        # One word so far: wait for a second word, or idle to decide on the first.
+        # Wait for more opening words, or idle to decide.
         self._schedule_idle()
 
-    def _evaluate_opening(self, had_separator: bool) -> None:
+    def _evaluate_opening(self, had_separator: bool, wait_for_more: bool = False) -> None:
         if self._pending:
             self._pending.cancel()
             self._pending = None
@@ -215,6 +220,8 @@ class Watcher:
             },
         )
         if not decision.get("convert"):
+            if wait_for_more:
+                return
             self._mark_field_done()
             return
         pause = self.config.get("pause_ms", 180) / 1000

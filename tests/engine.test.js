@@ -54,6 +54,8 @@ assert("windows z is ئ", winZ, "ئ");
 assert("egyptian ازيك present", KF.ARABIC_WORDS.has("ازيك") ? "yes" : "no", "yes");
 assert("egyptian كده present", KF.ARABIC_WORDS.has("كده") ? "yes" : "no", "yes");
 assert("egyptian دلوقتي present", KF.ARABIC_WORDS.has("دلوقتي") ? "yes" : "no", "yes");
+assert("name صابر present", KF.ARABIC_WORDS.has("صابر") ? "yes" : "no", "yes");
+assert("name أنس present", KF.ARABIC_WORDS.has("أنس") ? "yes" : "no", "yes");
 
 if (fails.length) {
   console.error(fails.join("\n"));
