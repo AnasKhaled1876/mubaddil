@@ -1,7 +1,7 @@
 import threading
 import time
 
-from pynput import keyboard
+from pynput import keyboard, mouse
 
 from . import engine, ime
 
@@ -17,6 +17,7 @@ class Watcher:
         self.injecting = False
         self.controller = keyboard.Controller()
         self.listener: keyboard.Listener | None = None
+        self.mouse: mouse.Listener | None = None
         self._idle: threading.Timer | None = None
         self._pending: threading.Timer | None = None
         self._modifiers = set()
@@ -30,12 +31,16 @@ class Watcher:
         self.listener = keyboard.Listener(
             on_press=self.on_press, on_release=self.on_release
         )
+        self.mouse = mouse.Listener(on_click=self.on_click)
         self.listener.start()
+        self.mouse.start()
 
     def stop(self) -> None:
         self._cancel_timers()
         if self.listener:
             self.listener.stop()
+        if self.mouse:
+            self.mouse.stop()
 
     def _cancel_timers(self) -> None:
         if self._idle:
@@ -61,15 +66,24 @@ class Watcher:
     def on_release(self, key) -> None:
         self._modifiers.discard(key)
 
+    def _rearm_field(self) -> None:
+        self.armed_focus = ime.focus_token()
+        self.field_done = False
+        self.opening_words = []
+        self.opening_had_separator = False
+        self.buffer.clear()
+        self._cancel_timers()
+
     def _refresh_field(self) -> None:
         token = ime.focus_token()
         if token != self.armed_focus:
-            self.armed_focus = token
-            self.field_done = False
-            self.opening_words = []
-            self.opening_had_separator = False
-            self.buffer.clear()
-            self._cancel_timers()
+            self._rearm_field()
+
+    def on_click(self, x, y, button, pressed) -> None:
+        if self.injecting or not pressed:
+            return
+        # Chrome/WhatsApp keep one HWND for many boxes; a click is a new field.
+        self._rearm_field()
 
     def _mark_field_done(self) -> None:
         self.field_done = True
@@ -97,6 +111,10 @@ class Watcher:
 
         self._refresh_field()
 
+        if key == keyboard.Key.tab:
+            self._rearm_field()
+            return
+
         if self._mods_blocking():
             if self._is_undo(key):
                 self.undo()
@@ -115,7 +133,7 @@ class Watcher:
             if key == keyboard.Key.backspace:
                 return
             ch = getattr(key, "char", None)
-            if ch or key in {keyboard.Key.space, keyboard.Key.tab}:
+            if ch or key == keyboard.Key.space:
                 return
             return
 
@@ -124,7 +142,7 @@ class Watcher:
                 self.buffer.pop()
             return
 
-        if key in {keyboard.Key.space, keyboard.Key.tab}:
+        if key == keyboard.Key.space:
             word = "".join(self.buffer)
             self.buffer.clear()
             self._complete_word(word, had_separator=True)
