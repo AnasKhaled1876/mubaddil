@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Download, Laptop, RotateCcw, ShieldCheck, Check, Sparkles, ArrowDown } from 'lucide-react';
+import { Download, RotateCcw, ShieldCheck, Check, ArrowDown } from 'lucide-react';
 import { Language } from '../types';
+import { SETUP_FILE, SETUP_NAME } from '../data/download';
 
 interface HeroProps {
   lang: Language;
@@ -201,15 +202,15 @@ export const Hero: React.FC<HeroProps> = ({ lang, onDownloadClick, onScrollToDem
                   : 'opacity-0 translate-y-4 pointer-events-none'
               }`}
             >
-              <button
+              <a
                 id="hero-direct-download-btn"
-                type="button"
-                onClick={onDownloadClick}
-                className="w-full sm:w-auto min-w-[280px] px-8 py-4 rounded-2xl bg-[#166534] hover:bg-[#14532d] text-white font-bold text-lg flex items-center justify-center gap-3 shadow-xl shadow-[#166534]/25 hover:shadow-2xl hover:shadow-[#166534]/35 active:scale-[0.98] transition-all cursor-pointer"
+                href={SETUP_FILE}
+                download={SETUP_NAME}
+                className="w-full sm:w-auto min-w-[280px] px-8 py-4 rounded-2xl bg-[#166534] hover:bg-[#14532d] text-white font-bold text-lg flex items-center justify-center gap-3 shadow-xl shadow-[#166534]/25 hover:shadow-2xl hover:shadow-[#166534]/35 active:scale-[0.98] transition-all"
               >
                 <Download className="w-5 h-5" />
                 <span>{isAr ? 'تحميل مباشر لويندوز (مجاني)' : 'Download for Windows (Free)'}</span>
-              </button>
+              </a>
 
               {/* Micro reassurances */}
               <div className="flex items-center gap-4 text-xs text-neutral-500 dark:text-neutral-400 mt-4">

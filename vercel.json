@@ -3,5 +3,20 @@
   "framework": null,
   "installCommand": "npm install --prefix web",
   "buildCommand": "npm run build --prefix web",
-  "outputDirectory": "web/dist"
+  "outputDirectory": "web/dist",
+  "headers": [
+    {
+      "source": "/Mubaddil-Setup.exe",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/octet-stream"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"Mubaddil-Setup.exe\""
+        }
+      ]
+    }
+  ]
 }

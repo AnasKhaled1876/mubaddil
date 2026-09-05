@@ -59,7 +59,7 @@ export const StandaloneHtmlModal: React.FC<StandaloneHtmlModalProps> = ({
     <div class="p-8 rounded-3xl bg-white border-2 border-emerald-600/20 shadow-xl">
       <h2 class="text-3xl font-extrabold mb-3">حمّل. دبل كليك. خلصت.</h2>
       <p class="text-neutral-600 mb-6 text-sm">ملف واحد خفيف، يشتغل في شريط المهام في صمت بدون إعلانات أو نوافذ منبثقة.</p>
-      <a href="https://github.com/AnasKhaled1876/mubaddil/releases/latest" class="block w-full p-4 rounded-xl bg-[#166534] text-white font-bold hover:bg-[#14532d]">تحميل Mubaddil-Setup.exe (مجاني)</a>
+      <a href="/Mubaddil-Setup.exe" download="Mubaddil-Setup.exe" class="block w-full p-4 rounded-xl bg-[#166534] text-white font-bold hover:bg-[#14532d]">تحميل Mubaddil-Setup.exe (مجاني)</a>
     </div>
   </section>
 </body>
