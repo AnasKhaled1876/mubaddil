@@ -37,7 +37,8 @@ a = Analysis(
     binaries=mubaddil_binaries + tk_binaries,
     datas=mubaddil_datas
     + tk_datas
-    + [(os.path.join(native_dir, "assets", "icon.png"), "assets")],
+    + [(os.path.join(native_dir, "assets", "icon.png"), "assets")]
+    + [(os.path.join(native_dir, "mubaddil", "data"), "mubaddil/data")],
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},

@@ -1,37 +1,69 @@
 import re
 import sys
+from pathlib import Path
 
-ARABIC_WORDS = """
+_SEED_ARABIC = """
 السلام عليكم ورحمة وبركاته مرحبا اهلا اهلاً سهلا شكرا شكراً عفوا نعم لا من فضلك لو سمحت
-صباح الخير مساء الحمد لله إن شاء الله ما شاء الله الحمدلله يارب يا رب تسلم الله يعطيك العافية
-كيف حالك اخبارك تمام بخير الحمد الحمدلله انا انت انتي هو هي نحن هم هن هذا هذه ذلك تلك
-الذي التي الذين اللواتي في من على إلى الى عن مع أو او ثم قد لم لن كل بعض بعد قبل بين
-تحت فوق هنا هناك كيف ماذا متى اين أين لماذا لان لأن اذا إذا حتى عند غير نفس مثل اول أول
-اخر آخر جديد قديم كبير صغير كثير قليل حسن جيد سيء تمام حاضر ممكن ضروري مهم سريع بطيء
-اليوم غدا غداً امس أمس الان الآن جدا فقط ايضا أيضا لكن ايضاً العمل البيت المدرسة الكتاب
-الاسم رقم هاتف رسالة اجتماع موعد رجاء انتظر دقيقة
-مصر السعودية الامارات الإمارات الكويت قطر البحرين عمان الاردن الأردن لبنان العراق المغرب
-تونس الجزائر السودان اليمن فلسطين سوريا ليبيا
-الكتب الكتابة العربي العربية انجليزي الانجليزية الكمبيوتر ويندوز ابل ماك كيبورد لوحة المفاتيح
-اللغة غلط خطأ صح صحيح كلمة جملة نص كتب يكتب اكتب اريد اريد احتاج ممكن هل يوجد يوجد
-افتح اغلق احفظ ارسل احذف ابحث ادخل اخرج ابدأ انتهي انتهى
-الرجاء التأكد التحويل التبديل التصحيح
+صباح الخير مساء الحمد لله إن شاء الله ما شاء الله الحمدلله يارب يا رب
 """.split()
 
-ENGLISH_WORDS = """
-the be to of and a in that have i it for not on with he as you do at this but his by from
-they we say her she or an will my one all would there their what so up out if about who get
-which go me when make can like time no just him know take people into year your good some
-could them see other than then now look only come its over think also back after use two how
-our work first well way even new want because any these give day most us hello hi hey thanks
-thank please yes okay ok meeting email message boss please sorry welcome morning evening
-arabic english keyboard language layout switch convert fix wrong type typing write written
-windows mac laptop computer phone whatsapp word excel outlook gmail browser chrome
-name number please wait minute second today tomorrow yesterday now later
-egypt saudi emirates kuwait qatar bahrain oman jordan lebanon iraq morocco tunisia
-algeria sudan yemen palestine syria
+_SEED_ENGLISH = """
+hello hi hey thanks thank please yes okay ok good morning evening welcome sorry the and
 """.split()
 
+
+def _data_dirs() -> list[Path]:
+    here = Path(__file__).resolve().parent
+    dirs = [here / "data"]
+    try:
+        from .paths import bundle_dir
+
+        root = bundle_dir()
+        dirs.extend(
+            [
+                root / "mubaddil" / "data",
+                root / "data",
+                Path(sys.executable).resolve().parent / "mubaddil" / "data",
+            ]
+        )
+    except Exception:
+        pass
+    return dirs
+
+
+def _load_word_file(filename: str, fallback: list[str]) -> list[str]:
+    for folder in _data_dirs():
+        path = folder / filename
+        try:
+            if path.is_file():
+                words = [
+                    line.strip()
+                    for line in path.read_text(encoding="utf-8").splitlines()
+                    if line.strip() and not line.startswith("#")
+                ]
+                if words:
+                    return words
+        except OSError:
+            continue
+    return list(fallback)
+
+
+def _merge_word_lists(*lists: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for words in lists:
+        for word in words:
+            if word and word not in seen:
+                seen.add(word)
+                out.append(word)
+    return out
+
+
+ARABIC_WORDS = _merge_word_lists(
+    _load_word_file("arabic_words.txt", _SEED_ARABIC),
+    _load_word_file("arabic_names.txt", []),
+)
+ENGLISH_WORDS = _load_word_file("english_words.txt", _SEED_ENGLISH)
 WINDOWS_101_EN_TO_AR = {
     "`": "ذ",
     "1": "1",
@@ -330,6 +362,15 @@ def english_pattern_score(word: str) -> int:
     return score
 
 
+def in_dictionary(word: str, lang: str) -> bool:
+    clean = normalize(word)
+    if not clean:
+        return False
+    if lang == "ar":
+        return clean in ARABIC_WORD_SET
+    return clean.lower() in ENGLISH_WORD_SET
+
+
 def word_score(word: str, lang: str) -> int:
     clean = normalize(word)
     if not clean:
@@ -367,29 +408,65 @@ def analyze_word(word: str, layout_id: str) -> dict:
         "converted_score": converted_score,
         "delta": converted_score - original_score,
         "direction": "en-to-ar" if original_lang == "en" else "ar-to-en",
+        "dict_hit": in_dictionary(converted, converted_lang),
+        "already_valid": in_dictionary(clean, original_lang),
     }
 
 
 def should_convert(word: str, layout_id: str, options: dict | None = None) -> dict:
+    """Convert only when the remapped form is an exact dictionary hit."""
     options = options or {}
     min_length = options.get("min_length", 3)
-    sensitivity = options.get("sensitivity", "balanced")
-    needed = {"conservative": 8, "balanced": 5, "aggressive": 3}.get(sensitivity, 5)
     analysis = analyze_word(word, layout_id)
     if analysis.get("action") != "score":
         analysis["convert"] = False
         return analysis
     if len(normalize(analysis["word"])) < min_length:
         return {**analysis, "convert": False, "reason": "too-short"}
-    if analysis["original_score"] >= 10 and analysis["delta"] < 4:
+    if analysis.get("already_valid"):
         return {**analysis, "convert": False, "reason": "already-valid"}
-    if analysis["converted_score"] < 4:
-        return {**analysis, "convert": False, "reason": "weak-target"}
-    if analysis["delta"] < needed:
-        return {**analysis, "convert": False, "reason": "low-confidence"}
+    if not analysis.get("dict_hit"):
+        return {**analysis, "convert": False, "reason": "not-in-dictionary"}
     return {
         **analysis,
         "convert": True,
         "reason": "wrong-layout",
         "target_lang": analysis["converted_lang"],
+    }
+
+
+def should_convert_opening(
+    words: list[str], layout_id: str, options: dict | None = None
+) -> dict:
+    """Decide for the first 1–2 words of a field; convert only dictionary hits."""
+    cleaned = [w.strip() for w in words if w and w.strip()]
+    if not cleaned:
+        return {"convert": False, "words": [], "reason": "empty"}
+    decisions = [should_convert(word, layout_id, options) for word in cleaned]
+    converting = [d for d in decisions if d.get("convert")]
+    if not converting:
+        return {
+            "convert": False,
+            "words": cleaned,
+            "decisions": decisions,
+            "reason": "no-dict-hit",
+        }
+    direction = converting[0]["direction"]
+    target_lang = converting[0]["target_lang"]
+    converted_words = []
+    for word, decision in zip(cleaned, decisions):
+        if decision.get("convert") and decision.get("direction") == direction:
+            converted_words.append(decision["converted"])
+        else:
+            converted_words.append(word)
+    return {
+        "convert": True,
+        "words": cleaned,
+        "converted_words": converted_words,
+        "word": " ".join(cleaned),
+        "converted": " ".join(converted_words),
+        "direction": direction,
+        "target_lang": target_lang,
+        "reason": "wrong-layout",
+        "decisions": decisions,
     }

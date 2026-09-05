@@ -1,0 +1,27 @@
+Arabic + Egyptian word lists used for exact-hit layout detection.
+
+Modern Standard / general Arabic
+- hermitdave/FrequencyWords (OpenSubtitles-derived)
+  https://github.com/hermitdave/FrequencyWords
+  content/2016/ar/ar_50k.txt (top ~20k filtered)
+
+Egyptian Arabic
+- drelhaj/Arabic-Dialects on Hugging Face (CC-BY-4.0)
+  https://huggingface.co/datasets/drelhaj/Arabic-Dialects
+  EGY frequency list (count >= 3) and EGY-minus-MSA dialect vocabulary
+- AdhamAshraf/egyptian-2-arabic on Hugging Face
+  https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic
+  unique tokens from Egyptian sentences (count >= 2)
+- arbml/NileULex on Hugging Face (Egyptian/colloquial terms)
+  https://huggingface.co/datasets/arbml/NileULex
+  single-token Egyptian entries (insult-style ابن/ابو phrases skipped)
+
+English
+- first20hours/google-10000-english (Google Trillion Word Corpus)
+  https://github.com/first20hours/google-10000-english
+  google-10000-english-usa.txt
+
+Arabic personal names
+- native/mubaddil/data/arabic_names.txt (أنس خالد محمد صابر and common first names)
+
+Greeting / Egyptian chat seeds are always included.

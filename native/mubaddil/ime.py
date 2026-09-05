@@ -67,6 +67,69 @@ def prompt_mac_accessibility() -> bool:
         return result.returncode == 0
 
 
+def _primary_langid(langid: int) -> int:
+    return langid & 0x03FF
+
+
+def is_arabic_langid(langid: int) -> bool:
+    return _primary_langid(langid) == 0x01
+
+
+def is_english_langid(langid: int) -> bool:
+    return _primary_langid(langid) == 0x09
+
+
+def lang_of_hkl(hkl: int) -> str | None:
+    langid = int(hkl) & 0xFFFF
+    if is_arabic_langid(langid):
+        return "ar"
+    if is_english_langid(langid):
+        return "en"
+    return None
+
+
+def windows_keyboard_layout_id(hkl: int) -> str:
+    """Map an installed HKL to windows-101 vs windows-102 without adding layouts."""
+    layout_word = (int(hkl) >> 16) & 0xFFFF
+    if layout_word in {0x0104, 0x0204}:
+        return "windows-102"
+    return "windows-101"
+
+
+def _windows_installed_hkls() -> list[int]:
+    import ctypes
+    from ctypes import wintypes
+
+    user32 = ctypes.windll.user32
+    user32.GetKeyboardLayoutList.argtypes = [wintypes.UINT, ctypes.POINTER(wintypes.HKL)]
+    user32.GetKeyboardLayoutList.restype = wintypes.UINT
+    count = user32.GetKeyboardLayoutList(0, None)
+    if not count:
+        return []
+    buf = (wintypes.HKL * count)()
+    got = user32.GetKeyboardLayoutList(count, buf)
+    return [int(buf[i]) for i in range(got)]
+
+
+def pick_installed_hkl(target: str, layout_id: str | None = None) -> int | None:
+    """Choose an already-installed keyboard. Never LoadKeyboardLayout."""
+    matches = []
+    for hkl in _windows_installed_hkls():
+        if lang_of_hkl(hkl) == target:
+            matches.append(hkl)
+    if not matches:
+        return None
+    if target == "ar" and layout_id == "windows-102":
+        for hkl in matches:
+            if windows_keyboard_layout_id(hkl) == "windows-102":
+                return hkl
+    if target == "ar" and layout_id == "windows-101":
+        for hkl in matches:
+            if windows_keyboard_layout_id(hkl) == "windows-101":
+                return hkl
+    return matches[0]
+
+
 def list_sources() -> list[dict]:
     if sys.platform == "darwin":
         result = mac_run("ime", "list")
@@ -77,11 +140,18 @@ def list_sources() -> list[dict]:
         except json.JSONDecodeError:
             return []
     if sys.platform.startswith("win"):
-        return [
-            {"id": "00000409", "name": "English (US)"},
-            {"id": "00000401", "name": "Arabic (101)"},
-            {"id": "00010401", "name": "Arabic (102)"},
-        ]
+        rows = []
+        for hkl in _windows_installed_hkls():
+            lang = lang_of_hkl(hkl) or "other"
+            rows.append(
+                {
+                    "id": f"{int(hkl) & 0xFFFFFFFF:08x}",
+                    "name": "Arabic" if lang == "ar" else "English" if lang == "en" else lang,
+                    "lang": lang,
+                    "layout_id": windows_keyboard_layout_id(hkl) if lang == "ar" else "windows-101",
+                }
+            )
+        return rows
     return []
 
 
@@ -101,10 +171,7 @@ def current_lang() -> str | None:
         hwnd = user32.GetForegroundWindow()
         tid = user32.GetWindowThreadProcessId(hwnd, None)
         hkl = user32.GetKeyboardLayout(tid)
-        langid = hkl & 0xFFFF
-        if langid == 0x0401:
-            return "ar"
-        return "en"
+        return lang_of_hkl(int(hkl)) or "en"
     return None
 
 
@@ -123,14 +190,10 @@ def set_lang(target: str, layout_id: str | None = None) -> bool:
 def _set_windows_lang(target: str, layout_id: str | None) -> bool:
     import ctypes
 
-    user32 = ctypes.windll.user32
-    if target == "ar":
-        klid = "00010401" if layout_id == "windows-102" else "00000401"
-    else:
-        klid = "00000409"
-    hkl = user32.LoadKeyboardLayoutW(klid, 0x00000001)
+    hkl = pick_installed_hkl(target, layout_id)
     if not hkl:
         return False
+    user32 = ctypes.windll.user32
     hwnd = user32.GetForegroundWindow()
     user32.PostMessageW(hwnd, 0x0050, 0, hkl)
     user32.ActivateKeyboardLayout(hkl, 0)
@@ -141,36 +204,70 @@ _hud_handler = None
 
 
 def set_hud_handler(handler) -> None:
+    """Kept for API compatibility; correction HUD/notifications are disabled."""
     global _hud_handler
     _hud_handler = handler
 
 
 def show_hud(text: str) -> None:
-    if _hud_handler is not None:
-        try:
-            _hud_handler(text)
-            return
-        except Exception:
-            pass
+    """No-op: do not show notifications or HUDs on Windows or Mac."""
+    return
+
+
+def focus_token() -> str:
+    """Stable-ish id for the current focused control / window."""
+    if sys.platform.startswith("win"):
+        return _windows_focus_token()
     if sys.platform == "darwin":
-        binary = ensure_mac_binary()
-        if binary is not None:
-            subprocess.Popen(
-                [str(binary), "hud", text],
-                start_new_session=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            return
-        subprocess.Popen(
-            [
-                "osascript",
-                "-e",
-                f'display notification {json.dumps(text)} with title "مبدّل"',
-            ]
-        )
-        return
-    # Windows: never spawn PowerShell. Tray notify is registered from tray.py.
+        return _mac_focus_token()
+    return "default"
+
+
+def _windows_focus_token() -> str:
+    import ctypes
+    from ctypes import wintypes
+
+    class RECT(ctypes.Structure):
+        _fields_ = [
+            ("left", wintypes.LONG),
+            ("top", wintypes.LONG),
+            ("right", wintypes.LONG),
+            ("bottom", wintypes.LONG),
+        ]
+
+    class GUITHREADINFO(ctypes.Structure):
+        _fields_ = [
+            ("cbSize", wintypes.DWORD),
+            ("flags", wintypes.DWORD),
+            ("hwndActive", wintypes.HWND),
+            ("hwndFocus", wintypes.HWND),
+            ("hwndCapture", wintypes.HWND),
+            ("hwndMenuOwner", wintypes.HWND),
+            ("hwndMoveSize", wintypes.HWND),
+            ("hwndCaret", wintypes.HWND),
+            ("rcCaret", RECT),
+        ]
+
+    user32 = ctypes.windll.user32
+    info = GUITHREADINFO()
+    info.cbSize = ctypes.sizeof(GUITHREADINFO)
+    foreground = user32.GetForegroundWindow()
+    tid = user32.GetWindowThreadProcessId(foreground, None)
+    focus = 0
+    if user32.GetGUIThreadInfo(tid, ctypes.byref(info)):
+        focus = int(info.hwndFocus or 0) or int(info.hwndCaret or 0)
+    return f"win:{int(foreground or 0)}:{focus}"
+
+
+def _mac_focus_token() -> str:
+    try:
+        result = mac_run("focus-id")
+        token = (result.stdout or "").strip()
+        if result.returncode == 0 and token:
+            return f"mac:{token}"
+    except Exception:
+        pass
+    return "mac:unknown"
 
 
 def config_path() -> Path:
@@ -192,6 +289,13 @@ def detect_layout_id() -> str:
         if "arab" in blob:
             return "mac-arabic"
         return "mac-arabic-pc"
+    if sys.platform.startswith("win"):
+        arabic = [hkl for hkl in _windows_installed_hkls() if lang_of_hkl(hkl) == "ar"]
+        if arabic and all(
+            windows_keyboard_layout_id(hkl) == "windows-102" for hkl in arabic
+        ):
+            return "windows-102"
+        return "windows-101"
     return "windows-101"
 
 
@@ -200,8 +304,8 @@ def load_config() -> dict:
         "enabled": True,
         "layout_id": detect_layout_id(),
         "sensitivity": "balanced",
-        "pause_ms": 180,
-        "idle_ms": 600,
+        "pause_ms": 0,
+        "idle_ms": 0,
         "min_length": 3,
         "start_with_windows": True,
     }
@@ -211,9 +315,9 @@ def load_config() -> dict:
     try:
         stored = json.loads(path.read_text(encoding="utf-8"))
         merged = {**defaults, **stored}
-        if stored.get("pause_ms") == 700:
+        if stored.get("pause_ms") in {700, 180}:
             merged["pause_ms"] = defaults["pause_ms"]
-        if stored.get("idle_ms") == 1100:
+        if stored.get("idle_ms") in {1100, 600}:
             merged["idle_ms"] = defaults["idle_ms"]
         return merged
     except (OSError, json.JSONDecodeError):
