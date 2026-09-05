@@ -6,7 +6,7 @@ from pynput import keyboard
 from . import engine, ime
 
 SEPARATOR_CHARS = set(" \t!?()<>")
-MAX_OPENING_WORDS = 4
+MAX_OPENING_WORDS = 2
 
 
 class Watcher:

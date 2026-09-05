@@ -30,12 +30,10 @@ assert_eq("name انس", typed("hks")["converted"], "انس")
 assert_eq("name خالد", typed("ohg]")["converted"], "خالد")
 assert_eq("name محمد", typed("lpl]")["converted"], "محمد")
 assert_eq("name صابر", typed("whfv")["converted"], "صابر")
-full = engine.should_convert_opening(
-    ["Hks", "ohg]", "lpl]", "whfv"], "windows-101"
-)
+first_two = engine.should_convert_opening(["Hks", "ohg]"], "windows-101")
 assert_eq(
-    "full name أنس خالد محمد صابر",
-    full.get("convert") and full.get("converted") == "أنس خالد محمد صابر",
+    "first two name words أنس خالد",
+    first_two.get("convert") and first_two.get("converted") == "أنس خالد",
     True,
 )
 
