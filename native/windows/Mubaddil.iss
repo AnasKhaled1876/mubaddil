@@ -17,8 +17,8 @@ SetupIconFile=..\assets\icon.ico
 UninstallDisplayIcon={app}\Mubaddil.exe
 DisableProgramGroupPage=yes
 DisableWelcomePage=no
-CloseApplications=yes
-CloseApplicationsFilter=Mubaddil.exe
+CloseApplications=no
+RestartApplications=no
 
 [Tasks]
 Name: uninstallprevious; Description: "Uninstall previous version / إزالة النسخة السابقة"
@@ -60,6 +60,29 @@ begin
   Result := Value;
 end;
 
+procedure StopRunningApp;
+var
+  ResultCode: Integer;
+begin
+  { Tray app ignores Restart Manager; force-stop so file replace cannot stall. }
+  Exec(
+    ExpandConstant('{sys}\taskkill.exe'),
+    '/F /IM Mubaddil.exe /T',
+    '',
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  );
+  Sleep(400);
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  NeedsRestart := False;
+  StopRunningApp();
+  Result := '';
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   UninstallString: String;
@@ -67,6 +90,7 @@ var
 begin
   if (CurStep = ssInstall) and WizardIsTaskSelected('uninstallprevious') then
   begin
+    StopRunningApp();
     UninstallString := GetUninstallString();
     if UninstallString <> '' then
     begin
