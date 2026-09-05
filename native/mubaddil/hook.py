@@ -139,7 +139,6 @@ class Watcher:
             self._complete_word(word, had_separator=True)
             return
         self.buffer.append(ch)
-        self._schedule_idle()
 
     def _is_undo(self, key) -> bool:
         ch = getattr(key, "char", None)
@@ -151,30 +150,6 @@ class Watcher:
                 keyboard.Key.alt_r,
             }
         )
-
-    def _schedule_idle(self) -> None:
-        if self._idle:
-            self._idle.cancel()
-        delay = self.config.get("idle_ms", 600) / 1000
-        self._idle = threading.Timer(delay, self._idle_fire)
-        self._idle.daemon = True
-        self._idle.start()
-
-    def _idle_fire(self) -> None:
-        with self.lock:
-            if self.field_done:
-                return
-            word = "".join(self.buffer)
-            opening = list(self.opening_words)
-        if word:
-            # Idle mid-word: treat buffer as next opening word without separator.
-            self._complete_word(word, had_separator=False, clear_buffer=True)
-            return
-        if opening:
-            self._evaluate_opening(
-                had_separator=self.opening_had_separator,
-                wait_for_more=len(opening) < MAX_OPENING_WORDS,
-            )
 
     def _complete_word(
         self, word: str, had_separator: bool, clear_buffer: bool = False
@@ -196,13 +171,10 @@ class Watcher:
             self.opening_had_separator = had_separator
         if not self.opening_words:
             return
-        if len(self.opening_words) >= MAX_OPENING_WORDS:
-            self._evaluate_opening(
-                had_separator=self.opening_had_separator, wait_for_more=False
-            )
-            return
-        # Wait for more opening words, or idle to decide.
-        self._schedule_idle()
+        self._evaluate_opening(
+            had_separator=self.opening_had_separator,
+            wait_for_more=len(self.opening_words) < MAX_OPENING_WORDS,
+        )
 
     def _evaluate_opening(self, had_separator: bool, wait_for_more: bool = False) -> None:
         if self._pending:
@@ -224,10 +196,8 @@ class Watcher:
                 return
             self._mark_field_done()
             return
-        pause = self.config.get("pause_ms", 180) / 1000
-        self._pending = threading.Timer(
-            pause, lambda: self._apply(decision, had_separator)
-        )
+        # Apply on the next tick so Space finishes, with no user-visible pause.
+        self._pending = threading.Timer(0, lambda: self._apply(decision, had_separator))
         self._pending.daemon = True
         self._pending.start()
 

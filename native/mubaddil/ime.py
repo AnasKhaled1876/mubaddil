@@ -304,8 +304,8 @@ def load_config() -> dict:
         "enabled": True,
         "layout_id": detect_layout_id(),
         "sensitivity": "balanced",
-        "pause_ms": 180,
-        "idle_ms": 600,
+        "pause_ms": 0,
+        "idle_ms": 0,
         "min_length": 3,
         "start_with_windows": True,
     }
@@ -315,9 +315,9 @@ def load_config() -> dict:
     try:
         stored = json.loads(path.read_text(encoding="utf-8"))
         merged = {**defaults, **stored}
-        if stored.get("pause_ms") == 700:
+        if stored.get("pause_ms") in {700, 180}:
             merged["pause_ms"] = defaults["pause_ms"]
-        if stored.get("idle_ms") == 1100:
+        if stored.get("idle_ms") in {1100, 600}:
             merged["idle_ms"] = defaults["idle_ms"]
         return merged
     except (OSError, json.JSONDecodeError):
