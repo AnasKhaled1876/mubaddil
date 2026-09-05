@@ -21,6 +21,7 @@
       <a class="brand" href="#top">مبدّل</a>
       <nav class="nav-links">
         <a href="#watch" data-ar="شوفه" data-en="Watch">شوفه</a>
+        <a href="#why" data-ar="ليه" data-en="Why">ليه</a>
         <a href="#download" data-ar="حمّل" data-en="Download">حمّل</a>
       </nav>
       <div class="nav-actions">
@@ -29,111 +30,121 @@
       </div>
     </header>
 
-    <main id="top">
-      <section class="hero">
-        <p class="eyebrow" data-ar="ثواني بتضيع كل يوم." data-en="Seconds you lose every day.">
-          ثواني بتضيع كل يوم.
-        </p>
-        <h1 data-ar="تكتب ثلاث ثواني… واللغة غلط." data-en="You type for three seconds. Wrong language.">
-          تكتب ثلاث ثواني… واللغة غلط.
-        </h1>
-        <p class="lead" data-ar="تمسح. تعيد. تتأخر على الرسالة. مبدّل يصلّح الكلمة وأنت لسه بتكتب." data-en="You delete. You retype. The message is late. Mubaddil fixes the word while you keep going.">
-          تمسح. تعيد. تتأخر على الرسالة. مبدّل يصلّح الكلمة وأنت لسه بتكتب.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary btn-lg" href="#download" data-ar="حمّل لويندوز" data-en="Download for Windows">حمّل لويندوز</a>
+    <main>
+      <section class="band" id="top">
+        <div class="band-inner hero">
+          <p class="eyebrow" data-ar="ثواني بتضيع كل يوم." data-en="Seconds you lose every day.">
+            ثواني بتضيع كل يوم.
+          </p>
+          <h1 data-ar="تكتب ثلاث ثواني… واللغة غلط." data-en="You type for three seconds. Wrong language.">
+            تكتب ثلاث ثواني… واللغة غلط.
+          </h1>
+          <p class="lead" data-ar="تمسح. تعيد. تتأخر على الرسالة. مبدّل يصلّح الكلمة وأنت لسه بتكتب." data-en="You delete. You retype. The message is late. Mubaddil fixes the word while you keep going.">
+            تمسح. تعيد. تتأخر على الرسالة. مبدّل يصلّح الكلمة وأنت لسه بتكتب.
+          </p>
+          <p class="hero-note" data-ar="مجاني لويندوز." data-en="Free for Windows.">مجاني لويندوز.</p>
+          <a class="scroll-hint" href="#watch" data-ar="انزل تحت. شوفه وهو بيصلح." data-en="Scroll down. Watch it fix the word.">
+            انزل تحت. شوفه وهو بيصلح.
+          </a>
         </div>
-        <p class="hero-note" data-ar="مجاني لويندوز." data-en="Free for Windows.">مجاني لويندوز.</p>
       </section>
 
-      <section class="section" id="watch">
-        <div class="section-head">
-          <h2 data-ar="شوفه وهو بيصلح" data-en="Watch it fix the word">شوفه وهو بيصلح</h2>
-          <p data-ar="من غير ما تعمل حاجة." data-en="You don’t have to do a thing.">
-            من غير ما تعمل حاجة.
-          </p>
-        </div>
-
-        <div class="compose" role="img" aria-labelledby="compose-title compose-caption">
-          <div class="compose-bar">
-            <span class="compose-dots" aria-hidden="true"></span>
-            <p class="compose-title" id="compose-title" data-ar="رسالة لمديرك" data-en="Message to your manager">
-              رسالة لمديرك
+      <section class="band band-mist" id="watch">
+        <div class="band-inner">
+          <div class="section-head">
+            <h2 data-ar="شوفه وهو بيصلح" data-en="Watch it fix the word">شوفه وهو بيصلح</h2>
+            <p data-ar="من غير ما تعمل حاجة." data-en="You don’t have to do a thing.">
+              من غير ما تعمل حاجة.
             </p>
           </div>
-          <div class="compose-thread">
-            <p class="compose-caption" id="compose-caption" data-ar="زي ما بتكتب في الشغل." data-en="Like the messages you send at work.">
-              زي ما بتكتب في الشغل.
-            </p>
-            <div class="compose-box">
-              <p class="compose-line">
-                <span id="scene-text"></span><span class="caret" aria-hidden="true"></span>
+
+          <div class="compose" id="compose" role="img" aria-labelledby="compose-title compose-caption">
+            <div class="compose-bar">
+              <span class="compose-dots" aria-hidden="true"></span>
+              <p class="compose-title" id="compose-title" data-ar="رسالة لمديرك" data-en="Message to your manager">
+                رسالة لمديرك
               </p>
+            </div>
+            <div class="compose-thread">
+              <p class="compose-caption" id="compose-caption" data-ar="زي ما بتكتب في الشغل." data-en="Like the messages you send at work.">
+                زي ما بتكتب في الشغل.
+              </p>
+              <div class="compose-box">
+                <p class="compose-line">
+                  <span id="scene-text"></span><span class="caret" aria-hidden="true"></span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="section benefits">
-        <div class="section-head">
-          <h2 data-ar="علشان وقتك." data-en="Because your time matters.">علشان وقتك.</h2>
-        </div>
-        <div class="cards">
-          <article>
-            <h3 data-ar="مش هتمسح وتعيد" data-en="No more delete and retype">مش هتمسح وتعيد</h3>
-            <p data-ar="الكلمة الغلط تتظبط لوحدها. تكمل الرسالة." data-en="The wrong word fixes itself. You finish the message.">
-              الكلمة الغلط تتظبط لوحدها. تكمل الرسالة.
-            </p>
-          </article>
-          <article>
-            <h3 data-ar="مش بيقطعك" data-en="It stays out of the way">مش بيقطعك</h3>
-            <p data-ar="يشتغل في الخلفية. مفيش نوافذ ومفيش رسائل فوق الشاشة." data-en="It works in the background. No windows. No pop-ups.">
-              يشتغل في الخلفية. مفيش نوافذ ومفيش رسائل فوق الشاشة.
-            </p>
-          </article>
-          <article>
-            <h3 data-ar="أول الكلمتين بس" data-en="Just the first two words">أول الكلمتين بس</h3>
-            <p data-ar="يصلح البداية، وباقي الرسالة تفضل زي ما كتبتها." data-en="It fixes the opening. The rest of the message stays yours.">
-              يصلح البداية، وباقي الرسالة تفضل زي ما كتبتها.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section" id="download">
-        <div class="offer">
-          <p class="eyebrow" data-ar="ويندوز" data-en="Windows">ويندوز</p>
-          <h2 data-ar="حمّل. دبل كليك. خلصت." data-en="Download. Double-click. Done.">
-            حمّل. دبل كليك. خلصت.
-          </h2>
-          <p class="price" data-ar="مجاني" data-en="Free">مجاني</p>
-          <a
-            class="btn btn-primary btn-lg"
-            href="https://github.com/AnasKhaled1876/mubaddil/actions/workflows/msix.yml"
-            data-ar="حمّل لويندوز"
-            data-en="Download for Windows"
-          >
-            حمّل لويندوز
-          </a>
+      <section class="band" id="why">
+        <div class="band-inner">
+          <div class="section-head">
+            <h2 data-ar="علشان وقتك." data-en="Because your time matters.">علشان وقتك.</h2>
+          </div>
+          <div class="cards">
+            <article>
+              <h3 data-ar="مش هتمسح وتعيد" data-en="No more delete and retype">مش هتمسح وتعيد</h3>
+              <p data-ar="الكلمة الغلط تتظبط لوحدها. تكمل الرسالة." data-en="The wrong word fixes itself. You finish the message.">
+                الكلمة الغلط تتظبط لوحدها. تكمل الرسالة.
+              </p>
+            </article>
+            <article>
+              <h3 data-ar="مش بيقطعك" data-en="It stays out of the way">مش بيقطعك</h3>
+              <p data-ar="يشتغل في الخلفية. مفيش نوافذ ومفيش رسائل فوق الشاشة." data-en="It works in the background. No windows. No pop-ups.">
+                يشتغل في الخلفية. مفيش نوافذ ومفيش رسائل فوق الشاشة.
+              </p>
+            </article>
+            <article>
+              <h3 data-ar="أول الكلمتين بس" data-en="Just the first two words">أول الكلمتين بس</h3>
+              <p data-ar="يصلح البداية، وباقي الرسالة تفضل زي ما كتبتها." data-en="It fixes the opening. The rest of the message stays yours.">
+                يصلح البداية، وباقي الرسالة تفضل زي ما كتبتها.
+              </p>
+            </article>
+          </div>
         </div>
       </section>
 
-      <section class="section faq">
-        <div class="section-head">
-          <h2 data-ar="سؤالين بس" data-en="Two quick answers">سؤالين بس</h2>
+      <section class="band band-mist" id="download">
+        <div class="band-inner">
+          <div class="offer">
+            <p class="eyebrow" data-ar="ويندوز" data-en="Windows">ويندوز</p>
+            <h2 data-ar="حمّل. دبل كليك. خلصت." data-en="Download. Double-click. Done.">
+              حمّل. دبل كليك. خلصت.
+            </h2>
+            <p class="price" data-ar="مجاني" data-en="Free">مجاني</p>
+            <a
+              class="btn btn-primary btn-lg"
+              href="https://github.com/AnasKhaled1876/mubaddil/actions/workflows/msix.yml"
+              data-ar="حمّل لويندوز"
+              data-en="Download for Windows"
+            >
+              حمّل لويندوز
+            </a>
+          </div>
         </div>
-        <details>
-          <summary data-ar="هيغيّر الرسالة كلها؟" data-en="Will it change the whole message?">
-            هيغيّر الرسالة كلها؟
-          </summary>
-          <p data-ar="لأ. أول كلمتين بس، وبعدين يسيبك تكمل." data-en="No. Just the first two words, then it lets you finish.">
-            لأ. أول كلمتين بس، وبعدين يسيبك تكمل.
-          </p>
-        </details>
-        <details>
-          <summary data-ar="بفلوس؟" data-en="Does it cost money?">بفلوس؟</summary>
-          <p data-ar="مجاني." data-en="It’s free.">مجاني.</p>
-        </details>
+      </section>
+
+      <section class="band" id="faq">
+        <div class="band-inner faq">
+          <div class="section-head">
+            <h2 data-ar="سؤالين بس" data-en="Two quick answers">سؤالين بس</h2>
+          </div>
+          <details>
+            <summary data-ar="هيغيّر الرسالة كلها؟" data-en="Will it change the whole message?">
+              هيغيّر الرسالة كلها؟
+            </summary>
+            <p data-ar="لأ. أول كلمتين بس، وبعدين يسيبك تكمل." data-en="No. Just the first two words, then it lets you finish.">
+              لأ. أول كلمتين بس، وبعدين يسيبك تكمل.
+            </p>
+          </details>
+          <details>
+            <summary data-ar="بفلوس؟" data-en="Does it cost money?">بفلوس؟</summary>
+            <p data-ar="مجاني." data-en="It’s free.">مجاني.</p>
+          </details>
+        </div>
       </section>
     </main>
 

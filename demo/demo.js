@@ -1,5 +1,6 @@
 const langToggle = document.getElementById("lang-toggle");
 const sceneText = document.getElementById("scene-text");
+const compose = document.getElementById("compose");
 
 const TYPE_MS = 95;
 const HOLD_MS = 280;
@@ -8,7 +9,7 @@ const BETWEEN_MS = 220;
 const END_MS = 2200;
 
 let lang = "ar";
-let playId = 0;
+let current = null;
 
 function applyLang(next) {
   document.documentElement.lang = next === "en" ? "en" : "ar";
@@ -32,7 +33,10 @@ function prefersReducedMotion() {
 function sleep(ms, token) {
   return new Promise((resolve) => {
     const timer = setTimeout(resolve, ms);
-    if (token) token.cancel = () => clearTimeout(timer);
+    token.cancel = () => {
+      clearTimeout(timer);
+      resolve();
+    };
   });
 }
 
@@ -99,8 +103,7 @@ async function playLoop(token) {
 }
 
 function startScene() {
-  playId += 1;
-  const token = { stopped: false, id: playId };
+  const token = { stopped: false, cancel() {} };
   if (prefersReducedMotion()) {
     showFinished();
     return token;
@@ -109,9 +112,41 @@ function startScene() {
   return token;
 }
 
-let current = startScene();
+function stopScene() {
+  if (!current) {
+    clearScene();
+    return;
+  }
+  current.stopped = true;
+  current.cancel();
+  current = null;
+  clearScene();
+}
+
+function setVisible(visible) {
+  if (prefersReducedMotion()) {
+    if (visible) showFinished();
+    return;
+  }
+  if (visible) {
+    if (!current) current = startScene();
+    return;
+  }
+  stopScene();
+}
+
+const observer = new IntersectionObserver(
+  ([entry]) => {
+    setVisible(entry.isIntersecting && entry.intersectionRatio >= 0.4);
+  },
+  { threshold: [0, 0.4, 0.6, 1] },
+);
+
+observer.observe(compose);
 
 window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", () => {
-  current.stopped = true;
-  current = startScene();
+  stopScene();
+  if (compose.getBoundingClientRect().top < window.innerHeight) {
+    setVisible(true);
+  }
 });
