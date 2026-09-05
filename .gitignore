@@ -7,3 +7,5 @@ native/build/
 .DS_Store
 public/
 .vercel
+node_modules/
+web/dist/
