@@ -6,7 +6,7 @@
     <title>مبدّل — يصلح الكتابة بالكيبورد الغلط</title>
     <meta
       name="description"
-      content="مبدّل يصلح أول كلمتين لو كتبت واللغة غلط، يبدّل للكيبورد الموجود عندك، ويسكت. لويندوز."
+      content="بتكتب واللغة غلط؟ مبدّل يصلّح أول كلمتين وأنت مكمل شغلك. مجاني لويندوز."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,8 +20,7 @@
     <header class="nav">
       <a class="brand" href="#top">مبدّل</a>
       <nav class="nav-links">
-        <a href="#try" data-ar="جرّب" data-en="Try">جرّب</a>
-        <a href="#how" data-ar="كيف يعمل" data-en="How it works">كيف يعمل</a>
+        <a href="#watch" data-ar="شوفه" data-en="Watch">شوفه</a>
         <a href="#download" data-ar="حمّل" data-en="Download">حمّل</a>
       </nav>
       <div class="nav-actions">
@@ -32,129 +31,70 @@
 
     <main id="top">
       <section class="hero">
-        <p class="eyebrow" data-ar="منتج واحد. مشكلة واحدة." data-en="One product. One problem.">
-          منتج واحد. مشكلة واحدة.
+        <p class="eyebrow" data-ar="ثواني بتضيع كل يوم." data-en="Seconds you lose every day.">
+          ثواني بتضيع كل يوم.
         </p>
         <h1 data-ar="تكتب ثلاث ثواني… واللغة غلط." data-en="You type for three seconds. Wrong language.">
           تكتب ثلاث ثواني… واللغة غلط.
         </h1>
-        <p class="lead" data-ar="مبدّل يصلح أول كلمتين، يبدّل للكيبورد العربي أو الإنجليزي الموجود على جهازك، وبعدين يسكت لحد ما تدخل خانة تانية. من غير إشعارات. من غير كيبورد جديد." data-en="Mubaddil fixes the first two words, switches to the Arabic or English keyboard already on your PC, then stays quiet until you enter another field. No notifications. No extra keyboard.">
-          مبدّل يصلح أول كلمتين، يبدّل للكيبورد العربي أو الإنجليزي الموجود على جهازك، وبعدين يسكت لحد ما تدخل خانة تانية. من غير إشعارات. من غير كيبورد جديد.
+        <p class="lead" data-ar="تمسح. تعيد. تتأخر على الرسالة. مبدّل يصلّح الكلمة وأنت لسه بتكتب." data-en="You delete. You retype. The message is late. Mubaddil fixes the word while you keep going.">
+          تمسح. تعيد. تتأخر على الرسالة. مبدّل يصلّح الكلمة وأنت لسه بتكتب.
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary btn-lg" href="#download" data-ar="حمّل لويندوز" data-en="Download for Windows">حمّل لويندوز</a>
-          <a class="btn btn-ghost btn-lg" href="#try" data-ar="جرّب هنا" data-en="Try it here">جرّب هنا</a>
         </div>
-        <p class="hero-note" data-ar="مجاني. ملف واحد. من غير أدمن." data-en="Free. One file. No admin.">
-          مجاني. ملف واحد. من غير أدمن.
-        </p>
+        <p class="hero-note" data-ar="مجاني لويندوز." data-en="Free for Windows.">مجاني لويندوز.</p>
       </section>
 
-      <section class="section" id="try">
+      <section class="section" id="watch">
         <div class="section-head">
-          <h2 data-ar="شوفه وهو بيصلح" data-en="Watch it fix a word">شوفه وهو بيصلح</h2>
-          <p data-ar="اكتب hgsghl ثم مسافة. المفروض تبقى السلام. كمّل كتابة — الباقي مش هيتلمس." data-en="Type hgsghl then Space. It should become السلام. Keep typing — the rest stays put.">
-            اكتب hgsghl ثم مسافة. المفروض تبقى السلام. كمّل كتابة — الباقي مش هيتلمس.
+          <h2 data-ar="شوفه وهو بيصلح" data-en="Watch it fix the word">شوفه وهو بيصلح</h2>
+          <p data-ar="من غير ما تعمل حاجة." data-en="You don’t have to do a thing.">
+            من غير ما تعمل حاجة.
           </p>
         </div>
-        <div class="demo-shell">
-          <div class="demo-toolbar">
-            <label>
-              <span data-ar="التخطيط" data-en="Layout">التخطيط</span>
-              <select id="layout"></select>
-            </label>
-            <p class="demo-hint" id="status">في انتظار الكتابة</p>
-          </div>
-          <div class="demo-fields">
-            <label class="field">
-              <span data-ar="خانة البحث" data-en="Search field">خانة البحث</span>
-              <textarea
-                id="box-search"
-                class="try-box"
-                dir="auto"
-                placeholder="hgsghl ثم مسافة"
-              ></textarea>
-            </label>
-            <label class="field">
-              <span data-ar="خانة الرسالة" data-en="Message field">خانة الرسالة</span>
-              <textarea
-                id="box-chat"
-                class="try-box"
-                dir="auto"
-                placeholder=" ugd;l ثم مسافة — بعد ما تدخل الخانة"
-              ></textarea>
-            </label>
-          </div>
-          <div class="examples">
-            <button type="button" data-sample="hgsghl " data-target="box-search">hgsghl → السلام</button>
-            <button type="button" data-sample="ugd;l " data-target="box-chat">ugd;l → عليكم</button>
-            <button type="button" data-sample="اثممخ " data-target="box-search">اثممخ → hello</button>
-            <button type="button" data-sample="Hks " data-target="box-chat">Hks → أنس</button>
-          </div>
-        </div>
-      </section>
 
-      <section class="section" id="how">
-        <div class="section-head">
-          <h2 data-ar="ثلاث خطوات. على طول." data-en="Three steps. Immediately.">ثلاث خطوات. على طول.</h2>
-          <p data-ar="من غير انتظار. المسافة هي الإشارة." data-en="No pause. Space is the signal.">
-            من غير انتظار. المسافة هي الإشارة.
-          </p>
+        <div class="compose" role="img" aria-labelledby="compose-title compose-caption">
+          <div class="compose-bar">
+            <span class="compose-dots" aria-hidden="true"></span>
+            <p class="compose-title" id="compose-title" data-ar="رسالة لمديرك" data-en="Message to your manager">
+              رسالة لمديرك
+            </p>
+          </div>
+          <div class="compose-thread">
+            <p class="compose-caption" id="compose-caption" data-ar="زي ما بتكتب في الشغل." data-en="Like the messages you send at work.">
+              زي ما بتكتب في الشغل.
+            </p>
+            <div class="compose-box">
+              <p class="compose-line">
+                <span id="scene-text"></span><span class="caret" aria-hidden="true"></span>
+              </p>
+            </div>
+          </div>
         </div>
-        <ol class="steps">
-          <li>
-            <span class="step-num">1</span>
-            <h3 data-ar="بتكتب أول كلمة" data-en="You type the first word">بتكتب أول كلمة</h3>
-            <p data-ar="الكيبورد على اللغة الغلط. مبدّل بيسجّل الأزرار الفعلية." data-en="The keyboard is on the wrong language. Mubaddil records the physical keys.">
-              الكيبورد على اللغة الغلط. مبدّل بيسجّل الأزرار الفعلية.
-            </p>
-          </li>
-          <li>
-            <span class="step-num">2</span>
-            <h3 data-ar="مسافة" data-en="Space">مسافة</h3>
-            <p data-ar="الكلمة تتظبط فورًا، واللغة ترجع للكيبورد الموجود عندك." data-en="The word is fixed at once, and the language switches to a keyboard you already have.">
-              الكلمة تتظبط فورًا، واللغة ترجع للكيبورد الموجود عندك.
-            </p>
-          </li>
-          <li>
-            <span class="step-num">3</span>
-            <h3 data-ar="يسكت" data-en="It stops">يسكت</h3>
-            <p data-ar="كلمتين بس في الخانة. اضغط أو Tab على خانة تانية عشان يعيد." data-en="Only two words in that field. Click or Tab into another field to start again.">
-              كلمتين بس في الخانة. اضغط أو Tab على خانة تانية عشان يعيد.
-            </p>
-          </li>
-        </ol>
       </section>
 
       <section class="section benefits">
         <div class="section-head">
-          <h2 data-ar="يشتغل في الخلفية. مش في وشك." data-en="It works in the background. Not in your face.">
-            يشتغل في الخلفية. مش في وشك.
-          </h2>
+          <h2 data-ar="علشان وقتك." data-en="Because your time matters.">علشان وقتك.</h2>
         </div>
         <div class="cards">
           <article>
-            <h3 data-ar="من غير إشعارات" data-en="No notifications">من غير إشعارات</h3>
-            <p data-ar="أيقونة جنب الساعة. مفيش نوافذ ومفيش توست." data-en="A tray icon. No windows. No toasts.">
-              أيقونة جنب الساعة. مفيش نوافذ ومفيش توست.
+            <h3 data-ar="مش هتمسح وتعيد" data-en="No more delete and retype">مش هتمسح وتعيد</h3>
+            <p data-ar="الكلمة الغلط تتظبط لوحدها. تكمل الرسالة." data-en="The wrong word fixes itself. You finish the message.">
+              الكلمة الغلط تتظبط لوحدها. تكمل الرسالة.
             </p>
           </article>
           <article>
-            <h3 data-ar="أول كلمتين فقط" data-en="First two words only">أول كلمتين فقط</h3>
-            <p data-ar="يصلح البداية ويكمل معاك من غير ما يغيّر باقي الرسالة." data-en="It fixes the opening, then leaves the rest of the message alone.">
-              يصلح البداية ويكمل معاك من غير ما يغيّر باقي الرسالة.
+            <h3 data-ar="مش بيقطعك" data-en="It stays out of the way">مش بيقطعك</h3>
+            <p data-ar="يشتغل في الخلفية. مفيش نوافذ ومفيش رسائل فوق الشاشة." data-en="It works in the background. No windows. No pop-ups.">
+              يشتغل في الخلفية. مفيش نوافذ ومفيش رسائل فوق الشاشة.
             </p>
           </article>
           <article>
-            <h3 data-ar="كيبوردك إنت" data-en="Your keyboard">كيبوردك إنت</h3>
-            <p data-ar="بيستخدم العربي أو الإنجليزي المثبّت. مش بيضيف تخطيط جديد." data-en="It uses the Arabic or English layout already installed. It does not add a new one.">
-              بيستخدم العربي أو الإنجليزي المثبّت. مش بيضيف تخطيط جديد.
-            </p>
-          </article>
-          <article>
-            <h3 data-ar="كروم وواتساب والأسماء" data-en="Chrome, WhatsApp, names">كروم وواتساب والأسماء</h3>
-            <p data-ar="خانة جديدة = فرصة جديدة. وأنس وخالد ومحمد في القاموس." data-en="A new field is a new chance. أنس, خالد, and محمد are in the dictionary.">
-              خانة جديدة = فرصة جديدة. وأنس وخالد ومحمد في القاموس.
+            <h3 data-ar="أول الكلمتين بس" data-en="Just the first two words">أول الكلمتين بس</h3>
+            <p data-ar="يصلح البداية، وباقي الرسالة تفضل زي ما كتبتها." data-en="It fixes the opening. The rest of the message stays yours.">
+              يصلح البداية، وباقي الرسالة تفضل زي ما كتبتها.
             </p>
           </article>
         </div>
@@ -162,68 +102,43 @@
 
       <section class="section" id="download">
         <div class="offer">
-          <p class="eyebrow" data-ar="المنتج" data-en="The product">المنتج</p>
-          <h2 data-ar="مبدّل لويندوز" data-en="Mubaddil for Windows">مبدّل لويندوز</h2>
+          <p class="eyebrow" data-ar="ويندوز" data-en="Windows">ويندوز</p>
+          <h2 data-ar="حمّل. دبل كليك. خلصت." data-en="Download. Double-click. Done.">
+            حمّل. دبل كليك. خلصت.
+          </h2>
           <p class="price" data-ar="مجاني" data-en="Free">مجاني</p>
-          <ul>
-            <li data-ar="Mubaddil-Setup.exe — دبل كليك، Next، خلصت" data-en="Mubaddil-Setup.exe — double-click, Next, done">
-              Mubaddil-Setup.exe — دبل كليك، Next، خلصت
-            </li>
-            <li data-ar="من غير أدمن ومن غير شهادة" data-en="No admin. No certificate">
-              من غير أدمن ومن غير شهادة
-            </li>
-            <li data-ar="لو SmartScreen ظهر: More info → Run anyway" data-en="If SmartScreen appears: More info → Run anyway">
-              لو SmartScreen ظهر: More info → Run anyway
-            </li>
-          </ul>
           <a
             class="btn btn-primary btn-lg"
             href="https://github.com/AnasKhaled1876/mubaddil/actions/workflows/msix.yml"
-            data-ar="حمّل آخر نسخة من البناء"
-            data-en="Get the latest Windows build"
+            data-ar="حمّل لويندوز"
+            data-en="Download for Windows"
           >
-            حمّل آخر نسخة من البناء
+            حمّل لويندوز
           </a>
-          <p class="offer-note">
-            <span data-ar="من صفحة البناء: افتح آخر تشغيل ناجح ونزّل Mubaddil-Setup.exe." data-en="On the build page, open the latest successful run and download Mubaddil-Setup.exe.">
-              من صفحة البناء: افتح آخر تشغيل ناجح ونزّل Mubaddil-Setup.exe.
-            </span>
-            <br />
-            <span data-ar="ماك: " data-en="Mac: ">ماك: </span><code>./native/run.sh</code>
-          </p>
         </div>
       </section>
 
       <section class="section faq">
         <div class="section-head">
-          <h2 data-ar="أسئلة قصيرة" data-en="Short answers">أسئلة قصيرة</h2>
+          <h2 data-ar="سؤالين بس" data-en="Two quick answers">سؤالين بس</h2>
         </div>
         <details>
-          <summary data-ar="إزاي أرجع الكلمة؟" data-en="How do I undo?">إزاي أرجع الكلمة؟</summary>
-          <p data-ar="Alt+Z على ويندوز. Option+Z على ماك." data-en="Alt+Z on Windows. Option+Z on Mac.">
-            Alt+Z على ويندوز. Option+Z على ماك.
-          </p>
-        </details>
-        <details>
-          <summary data-ar="فيه واجهة؟" data-en="Is there a window?">فيه واجهة؟</summary>
-          <p data-ar="لأ. أيقونة في الـ tray: شغّال أو خروج." data-en="No. A tray icon: on or quit.">
-            لأ. أيقونة في الـ tray: شغّال أو خروج.
-          </p>
-        </details>
-        <details>
-          <summary data-ar="ليه مش بيصلح تاني في كروم؟" data-en="Why didn’t it fix again in Chrome?">
-            ليه مش بيصلح تاني في كروم؟
+          <summary data-ar="هيغيّر الرسالة كلها؟" data-en="Will it change the whole message?">
+            هيغيّر الرسالة كلها؟
           </summary>
-          <p data-ar="اضغط أو Tab على الخانة التانية. نفس الخانة قفل بعد أول كلمتين." data-en="Click or Tab into the next field. The same field locks after the first two words.">
-            اضغط أو Tab على الخانة التانية. نفس الخانة قفل بعد أول كلمتين.
+          <p data-ar="لأ. أول كلمتين بس، وبعدين يسيبك تكمل." data-en="No. Just the first two words, then it lets you finish.">
+            لأ. أول كلمتين بس، وبعدين يسيبك تكمل.
           </p>
+        </details>
+        <details>
+          <summary data-ar="بفلوس؟" data-en="Does it cost money?">بفلوس؟</summary>
+          <p data-ar="مجاني." data-en="It’s free.">مجاني.</p>
         </details>
       </section>
     </main>
 
     <footer class="footer">
       <a class="brand" href="#top">مبدّل</a>
-      <a href="https://github.com/AnasKhaled1876/mubaddil">GitHub</a>
       <a href="#download" data-ar="حمّل لويندوز" data-en="Download for Windows">حمّل لويندوز</a>
     </footer>
 
@@ -231,11 +146,6 @@
       <a class="btn btn-primary" href="#download" data-ar="حمّل لويندوز" data-en="Download for Windows">حمّل لويندوز</a>
     </div>
 
-    <script src="../extension/engine/layouts.js"></script>
-    <script src="../extension/engine/dictionaries.js"></script>
-    <script src="../extension/engine/convert.js"></script>
-    <script src="../extension/engine/detect.js"></script>
-    <script src="../extension/engine/controller.js"></script>
     <script src="demo.js"></script>
   </body>
 </html>
