@@ -56,6 +56,10 @@ assert_eq("arabic dictionary loaded", len(engine.ARABIC_WORD_SET) > 5000, True)
 assert_eq("english dictionary loaded", len(engine.ENGLISH_WORD_SET) > 5000, True)
 assert_eq("freq word في present", "في" in engine.ARABIC_WORD_SET, True)
 assert_eq("freq word please present", "please" in engine.ENGLISH_WORD_SET, True)
+assert_eq("egyptian ازيك present", "ازيك" in engine.ARABIC_WORD_SET, True)
+assert_eq("egyptian كده present", "كده" in engine.ARABIC_WORD_SET, True)
+assert_eq("egyptian دلوقتي present", "دلوقتي" in engine.ARABIC_WORD_SET, True)
+assert_eq("egyptian عايز present", "عايز" in engine.ARABIC_WORD_SET, True)
 
 # A common Arabic word from FrequencyWords should convert from wrong Latin keys
 # when remapped form is in the dictionary (e.g. من from ug on windows-101: u->ع g->ل — not من).

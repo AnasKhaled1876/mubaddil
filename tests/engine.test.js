@@ -51,6 +51,9 @@ const macZ = KF.convert("z", "mac-arabic");
 const winZ = KF.convert("z", "windows-101");
 assert("mac z is ظ", macZ, "ظ");
 assert("windows z is ئ", winZ, "ئ");
+assert("egyptian ازيك present", KF.ARABIC_WORDS.has("ازيك") ? "yes" : "no", "yes");
+assert("egyptian كده present", KF.ARABIC_WORDS.has("كده") ? "yes" : "no", "yes");
+assert("egyptian دلوقتي present", KF.ARABIC_WORDS.has("دلوقتي") ? "yes" : "no", "yes");
 
 if (fails.length) {
   console.error(fails.join("\n"));
