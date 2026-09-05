@@ -1,6 +1,7 @@
 import React from 'react';
-import { Download, Globe, CheckCircle2, Moon, Sun, Laptop } from 'lucide-react';
+import { Download, Globe, Moon, Sun } from 'lucide-react';
 import { Language, Theme } from '../types';
+import { SETUP_FILE, SETUP_NAME } from '../data/download';
 
 interface NavbarProps {
   lang: Language;
@@ -103,15 +104,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           {/* Primary Download CTA */}
-          <button
+          <a
             id="nav-download-btn"
-            type="button"
-            onClick={onDownloadClick}
-            className="px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#166534] hover:bg-[#14532d] text-white flex items-center gap-2 shadow-sm shadow-[#166534]/25 transition-all active:scale-98 cursor-pointer"
+            href={SETUP_FILE}
+            download={SETUP_NAME}
+            className="px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#166534] hover:bg-[#14532d] text-white flex items-center gap-2 shadow-sm shadow-[#166534]/25 transition-all active:scale-98"
           >
             <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>{isAr ? 'تحميل مجاني' : 'Download Free'}</span>
-          </button>
+          </a>
         </div>
       </div>
     </header>
