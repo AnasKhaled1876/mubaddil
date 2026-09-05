@@ -5,5 +5,7 @@ native/bin/
 native/dist/
 native/build/
 .DS_Store
-public/
+/public/
 .vercel
+node_modules/
+web/dist/
