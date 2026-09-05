@@ -97,11 +97,6 @@ a {
   background: var(--ok-dark);
 }
 
-.btn-ghost {
-  background: #fff;
-  border-color: var(--line);
-}
-
 .btn-lg {
   padding: 14px 22px;
   font-size: 17px;
@@ -134,13 +129,12 @@ a {
 
 .lead,
 .section-head p,
-.hero-note,
-.offer-note {
+.hero-note {
   color: var(--muted);
 }
 
 .lead {
-  max-width: 40rem;
+  max-width: 36rem;
   margin: 0 auto 28px;
   font-size: 20px;
 }
@@ -168,140 +162,113 @@ a {
   margin: 0 0 10px;
 }
 
-.demo-shell,
+.compose,
 .offer,
 .cards article,
-.steps li,
 .faq details {
   background: var(--mist);
   border: 1px solid var(--line);
   border-radius: 24px;
 }
 
-.demo-shell {
-  padding: 22px;
-  box-shadow: var(--shadow);
+.compose {
+  overflow: hidden;
   background: #fff;
+  box-shadow: var(--shadow);
 }
 
-.demo-toolbar {
+.compose-bar {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: end;
-  margin-bottom: 16px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--mist);
 }
 
-.demo-toolbar label,
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 13px;
+.compose-dots {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 16px 0 0 #c5d4cc, 32px 0 0 #e4ebe7;
+}
+
+.compose-title {
+  margin: 0;
+  margin-inline-start: 36px;
   font-weight: 600;
 }
 
-.demo-hint {
-  margin: 0;
+.compose-thread {
+  padding: 22px 22px 26px;
+}
+
+.compose-caption {
+  margin: 0 0 14px;
   color: var(--muted);
   font-size: 14px;
+}
+
+.compose-box {
+  min-height: 148px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--mist);
+}
+
+.compose-line {
+  margin: 0;
+  min-height: 1.6em;
+  font-size: clamp(26px, 4vw, 36px);
+  line-height: 1.6;
   font-weight: 500;
 }
 
-.demo-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+.word {
+  display: inline;
+  padding: 0 2px;
+  border-radius: 6px;
 }
 
-select,
-textarea {
-  width: 100%;
-  font: inherit;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #fff;
-  color: var(--ink);
+.word.wrong {
+  color: #8a4b1f;
 }
 
-select {
-  padding: 8px 10px;
+.word.fixed {
+  color: var(--ok-dark);
+  background: rgba(31, 107, 74, 0.12);
 }
 
-textarea {
-  min-height: 140px;
-  padding: 14px;
-  font-size: 22px;
-  font-weight: 400;
-  resize: vertical;
-}
-
-textarea.wrong {
-  outline: 2px solid #c45c26;
-}
-
-textarea.fixed {
-  outline: 2px solid var(--ok);
-}
-
-.examples {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.examples button {
-  border: 1px solid var(--line);
-  background: #fff;
-  border-radius: 999px;
-  padding: 6px 12px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.steps {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  padding: 0;
-  margin: 0;
-}
-
-.steps li,
-.cards article {
-  padding: 22px;
-}
-
-.step-num {
-  display: inline-flex;
-  width: 32px;
-  height: 32px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--ok);
-  color: #fff;
-  font-weight: 700;
-}
-
-.steps h3,
-.cards h3 {
-  margin: 12px 0 8px;
-}
-
-.steps p,
-.cards p,
-.faq p {
-  margin: 0;
-  color: var(--muted);
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-inline-start: 2px;
+  background: var(--ink);
+  vertical-align: -0.08em;
+  animation: blink 1s steps(1) infinite;
 }
 
 .cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
+}
+
+.cards article {
+  padding: 22px;
+}
+
+.cards h3 {
+  margin: 0 0 8px;
+}
+
+.cards p,
+.faq p {
+  margin: 0;
+  color: var(--muted);
 }
 
 .offer {
@@ -316,17 +283,6 @@ textarea.fixed {
   font-weight: 700;
   color: var(--ok);
   margin: 8px 0 20px;
-}
-
-.offer ul {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 24px;
-  color: var(--muted);
-}
-
-.offer li + li {
-  margin-top: 8px;
 }
 
 .faq details {
@@ -366,6 +322,12 @@ textarea.fixed {
   box-shadow: var(--shadow);
 }
 
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 800px) {
   .nav-links {
     display: none;
@@ -376,15 +338,8 @@ textarea.fixed {
     padding: 48px 18px 16px;
   }
 
-  .demo-fields,
-  .steps,
   .cards {
     grid-template-columns: 1fr;
-  }
-
-  .demo-toolbar {
-    flex-direction: column;
-    align-items: stretch;
   }
 
   .sticky-cta {
@@ -393,5 +348,11 @@ textarea.fixed {
 
   .footer {
     padding-bottom: 108px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
   }
 }
