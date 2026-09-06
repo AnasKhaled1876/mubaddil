@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CreditCard, RotateCcw, ShieldCheck, Check, ArrowDown } from 'lucide-react';
+import { Download, RotateCcw, ShieldCheck, Check, ArrowDown } from 'lucide-react';
 import { Language } from '../types';
-import { FALLBACK_AMOUNT_CENTS, FALLBACK_CURRENCY, formatPrice } from '../data/price';
+import { SETUP_FILE, SETUP_NAME } from '../data/download';
 
 interface HeroProps {
   lang: Language;
@@ -166,11 +166,7 @@ export const Hero: React.FC<HeroProps> = ({ lang, onDownloadClick, onScrollToDem
             {/* Micro Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-600/20 bg-emerald-50/80 dark:bg-emerald-950/50 text-[#166534] dark:text-emerald-300 text-xs font-semibold mb-6">
               <span className="w-2 h-2 rounded-full bg-[#166534] dark:bg-emerald-400 animate-pulse" />
-              <span>
-                {isAr
-                  ? `تطبيق لويندوز 10 و 11 • ${formatPrice(FALLBACK_AMOUNT_CENTS, FALLBACK_CURRENCY, 'ar')}`
-                  : `Windows App • ${formatPrice(FALLBACK_AMOUNT_CENTS, FALLBACK_CURRENCY, 'en')}`}
-              </span>
+              <span>{isAr ? 'تطبيق لويندوز 10 و 11 • مجاني 100%' : 'Windows App • 100% Free'}</span>
             </div>
 
             {/* Final Clean Display Headline */}
@@ -206,15 +202,15 @@ export const Hero: React.FC<HeroProps> = ({ lang, onDownloadClick, onScrollToDem
                   : 'opacity-0 translate-y-4 pointer-events-none'
               }`}
             >
-              <button
+              <a
                 id="hero-direct-download-btn"
-                type="button"
-                onClick={onDownloadClick}
+                href={SETUP_FILE}
+                download={SETUP_NAME}
                 className="w-full sm:w-auto min-w-[280px] px-8 py-4 rounded-2xl bg-[#166534] hover:bg-[#14532d] text-white font-bold text-lg flex items-center justify-center gap-3 shadow-xl shadow-[#166534]/25 hover:shadow-2xl hover:shadow-[#166534]/35 active:scale-[0.98] transition-all"
               >
-                <CreditCard className="w-5 h-5" />
-                <span>{isAr ? 'ادفع وحمّل لويندوز' : 'Pay & download for Windows'}</span>
-              </button>
+                <Download className="w-5 h-5" />
+                <span>{isAr ? 'تحميل مباشر لويندوز (مجاني)' : 'Download for Windows (Free)'}</span>
+              </a>
 
               {/* Micro reassurances */}
               <div className="flex items-center gap-4 text-xs text-neutral-500 dark:text-neutral-400 mt-4">

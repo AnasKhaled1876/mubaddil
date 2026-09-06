@@ -1,6 +1,7 @@
 import React from 'react';
-import { CreditCard, Globe, Moon, Sun } from 'lucide-react';
+import { Download, Globe, Moon, Sun } from 'lucide-react';
 import { Language, Theme } from '../types';
+import { SETUP_FILE, SETUP_NAME } from '../data/download';
 
 interface NavbarProps {
   lang: Language;
@@ -36,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {isAr ? 'مبدّل' : 'Mubaddil'}
               </span>
               <span className="px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase bg-emerald-50 dark:bg-emerald-950/70 text-[#166534] dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40 rounded-md">
-                {isAr ? 'دفعة واحدة' : 'One-time'}
+                {isAr ? 'مجاني' : 'FREE'}
               </span>
             </div>
             <span className="text-[11px] text-neutral-500 dark:text-neutral-400 -mt-0.5">
@@ -102,15 +103,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </button>
 
-          <button
+          {/* Primary Download CTA */}
+          <a
             id="nav-download-btn"
-            type="button"
-            onClick={onDownloadClick}
+            href={SETUP_FILE}
+            download={SETUP_NAME}
             className="px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#166534] hover:bg-[#14532d] text-white flex items-center gap-2 shadow-sm shadow-[#166534]/25 transition-all active:scale-98"
           >
-            <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>{isAr ? 'ادفع وحمّل' : 'Buy'}</span>
-          </button>
+            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>{isAr ? 'تحميل مجاني' : 'Download Free'}</span>
+          </a>
         </div>
       </div>
     </header>
