@@ -4,9 +4,15 @@
   "installCommand": "npm install --prefix web",
   "buildCommand": "npm run build --prefix web",
   "outputDirectory": "web/dist",
+  "rewrites": [
+    {
+      "source": "/payment",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
-      "source": "/Mubaddil-Setup.exe",
+      "source": "/files/Mubaddil-Setup.exe",
       "headers": [
         {
           "key": "Content-Type",
@@ -15,6 +21,10 @@
         {
           "key": "Content-Disposition",
           "value": "attachment; filename=\"Mubaddil-Setup.exe\""
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
         }
       ]
     }

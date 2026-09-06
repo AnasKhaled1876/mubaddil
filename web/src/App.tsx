@@ -9,19 +9,24 @@ import { DownloadSection } from './components/DownloadSection';
 import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
 import { StandaloneHtmlModal } from './components/StandaloneHtmlModal';
+import { PaymentPage } from './components/PaymentPage';
+
+function currentPath(): string {
+  if (typeof window === 'undefined') return '/';
+  return window.location.pathname;
+}
 
 export default function App() {
   const [lang, setLang] = useState<Language>('ar');
   const [theme, setTheme] = useState<Theme>('light');
   const [isHtmlModalOpen, setIsHtmlModalOpen] = useState<boolean>(false);
+  const [path, setPath] = useState<string>(currentPath);
 
-  // Sync direction with language
   useEffect(() => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
   }, [lang]);
 
-  // Sync theme class
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -29,6 +34,12 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [theme]);
+
+  useEffect(() => {
+    const onPop = () => setPath(currentPath());
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   const toggleLang = () => {
     setLang((prev) => (prev === 'ar' ? 'en' : 'ar'));
@@ -52,9 +63,19 @@ export default function App() {
     }
   };
 
+  if (path.startsWith('/payment')) {
+    return (
+      <PaymentPage
+        lang={lang}
+        theme={theme}
+        onToggleLang={toggleLang}
+        onToggleTheme={toggleTheme}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-[#fafaf8] dark:bg-[#111312] text-neutral-900 dark:text-neutral-100 transition-colors duration-200">
-      {/* Top Navigation */}
       <Navbar
         lang={lang}
         onToggleLang={toggleLang}
@@ -63,7 +84,6 @@ export default function App() {
         onDownloadClick={scrollToDownload}
       />
 
-      {/* Main Content Sections */}
       <main className="flex-1">
         <Hero
           lang={lang}
@@ -82,13 +102,11 @@ export default function App() {
         <FaqSection lang={lang} />
       </main>
 
-      {/* Footer */}
       <Footer
         lang={lang}
         onOpenHtmlModal={() => setIsHtmlModalOpen(true)}
       />
 
-      {/* Clean HTML Exporter Modal */}
       <StandaloneHtmlModal
         isOpen={isHtmlModalOpen}
         onClose={() => setIsHtmlModalOpen(false)}

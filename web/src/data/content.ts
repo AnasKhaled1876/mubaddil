@@ -41,10 +41,10 @@ export const faqs: FaqItem[] = [
     answerEn: 'It only inspects and corrects the first 1–2 words of any field. Once it detects the mistyped opening and switches Windows layout, it idles completely so you can type the rest freely without interruptions.',
   },
   {
-    questionAr: 'البرنامج مجاني فعلاً؟',
-    questionEn: 'Is the app really free?',
-    answerAr: 'أيوه، مبدّل مجاني تماماً 100%. مفيش اشتراكات، مفيش إعلانات، ومفيش كروت بنكية أو تجربة مؤقتة. حمّله واستخدمه علطول.',
-    answerEn: 'Yes, Mubaddil is 100% free. No subscriptions, no ads, no credit card required, and no trial limits. Just download and use it.',
+    questionAr: 'كام سعر مبدّل؟ فيه اشتراك؟',
+    questionEn: 'How much is Mubaddil? Is there a subscription?',
+    answerAr: 'دفعة واحدة 99 جنيه. مفيش اشتراك شهري، ومفيش إعلانات. بعد الدفع بيتفتح تحميل الملف، ودبل كليك وبتستخدمه علطول.',
+    answerEn: 'It is a one-time 99 EGP purchase. No monthly subscription and no ads. After payment is confirmed, the installer unlocks and you can start using it immediately.',
   },
   {
     questionAr: 'هل بيسجل اللي بكتبه أو بيبعت داتا للإنترنت؟',
