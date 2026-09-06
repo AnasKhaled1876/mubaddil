@@ -68,8 +68,8 @@ export const Footer: React.FC<FooterProps> = ({ lang, onOpenHtmlModal }) => {
           <div className="text-center md:text-left rtl:md:text-right text-[11px] text-neutral-400">
             <div>
               {isAr
-                ? 'مجاني ومفتوح المصدر • 100% أوفلاين لحماية خصوصيتك'
-                : 'Free & Open Source • 100% Offline for your privacy'}
+                ? 'دفعة واحدة • 100% أوفلاين لحماية خصوصيتك'
+                : 'One-time purchase • 100% Offline for your privacy'}
             </div>
             <div className="mt-0.5">
               © {new Date().getFullYear()} Mubaddil. All rights reserved.

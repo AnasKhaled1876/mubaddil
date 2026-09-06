@@ -38,7 +38,7 @@ export const StandaloneHtmlModal: React.FC<StandaloneHtmlModalProps> = ({
     <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-[#166534] text-white flex items-center justify-center font-bold text-lg">مـ</div>
-        <span class="font-bold text-lg">مبدّل <span class="text-xs px-2 py-0.5 bg-emerald-100 text-[#166534] rounded-md mr-2 font-semibold">مجاني</span></span>
+        <span class="font-bold text-lg">مبدّل <span class="text-xs px-2 py-0.5 bg-emerald-100 text-[#166534] rounded-md mr-2 font-semibold">دفعة واحدة</span></span>
       </div>
       <a href="#download" class="px-4 py-2 text-sm font-semibold rounded-lg bg-[#166534] text-white hover:bg-[#14532d] transition-colors">تحميل البرنامج</a>
     </div>
@@ -50,7 +50,7 @@ export const StandaloneHtmlModal: React.FC<StandaloneHtmlModalProps> = ({
       <span class="px-3 py-1 rounded-full border border-emerald-600/20 bg-emerald-50 text-[#166534] text-xs font-semibold">تطبيق لويندوز 10 و 11</span>
       <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-6 mb-4">كتبت عربي وطلع إنجليزي؟ <br><span class="text-[#166534]">مبدّل بيصلحه أول ما تدوس مسافة.</span></h1>
       <p class="text-base sm:text-lg text-neutral-600 mb-8 max-w-lg mx-auto leading-relaxed">بدون مسح وبدون Alt+Shift.. كمل كتابتك عادي ومبدّل هيقلب اللغة لوحده.</p>
-      <a href="#download" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#166534] text-white font-bold text-base shadow-lg hover:bg-[#14532d]">تحميل مباشر لويندوز (مجاني)</a>
+      <a href="#download" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#166534] text-white font-bold text-base shadow-lg hover:bg-[#14532d]">ادفع وحمّل لويندوز</a>
     </div>
   </section>
 
@@ -59,7 +59,7 @@ export const StandaloneHtmlModal: React.FC<StandaloneHtmlModalProps> = ({
     <div class="p-8 rounded-3xl bg-white border-2 border-emerald-600/20 shadow-xl">
       <h2 class="text-3xl font-extrabold mb-3">حمّل. دبل كليك. خلصت.</h2>
       <p class="text-neutral-600 mb-6 text-sm">ملف واحد خفيف، يشتغل في شريط المهام في صمت بدون إعلانات أو نوافذ منبثقة.</p>
-      <a href="/Mubaddil-Setup.exe" download="Mubaddil-Setup.exe" class="block w-full p-4 rounded-xl bg-[#166534] text-white font-bold hover:bg-[#14532d]">تحميل Mubaddil-Setup.exe (مجاني)</a>
+      <a href="#download" class="block w-full p-4 rounded-xl bg-[#166534] text-white font-bold hover:bg-[#14532d]">ادفع 99 جنيه وحمّل Mubaddil-Setup.exe</a>
     </div>
   </section>
 </body>
