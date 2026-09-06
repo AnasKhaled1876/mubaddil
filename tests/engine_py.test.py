@@ -16,6 +16,14 @@ assert_eq("سلام from english", engine.convert("hgsghl", "windows-101"), "ا�
 assert_eq("عليكم from english", engine.convert("ugd;l", "windows-101"), "عليكم")
 assert_eq("مرحبا from english", engine.convert("lvpfh", "windows-101"), "مرحبا")
 assert_eq("hello from arabic", engine.convert("اثممخ", "windows-101"), "hello")
+assert_eq("there from arabic", engine.convert("فاثقث", "windows-101"), "there")
+assert_eq("thanks from arabic", engine.convert("فاشىنس", "windows-101"), "thanks")
+assert_eq("please from arabic", engine.convert("حمثشسث", "windows-101"), "please")
+assert_eq("meeting from arabic", engine.convert("ةثثفهىل", "windows-101"), "meeting")
+assert_eq("tomorrow from arabic", engine.convert("فخةخققخص", "windows-101"), "tomorrow")
+assert_eq("email from arabic", engine.convert("ثةشهم", "windows-101"), "email")
+assert_eq("attached from arabic", engine.convert("شففشؤاثي", "windows-101"), "attached")
+assert_eq("report from arabic", engine.convert("قثحخقف", "windows-101"), "report")
 
 greeting = engine.should_convert("hgsghl", "windows-101")
 assert_eq("detect السلام", greeting["convert"] and greeting["converted"] == "السلام", True)
@@ -42,10 +50,17 @@ assert_eq(
     True,
 )
 
-opening_en = engine.should_convert_opening(["اثممخ"], "windows-101")
+opening_en = engine.should_convert_opening(["اثممخ", "فاثقث"], "windows-101")
 assert_eq(
     "opening english",
-    opening_en["convert"] and opening_en["converted"] == "hello",
+    opening_en["convert"] and opening_en["converted"] == "hello there",
+    True,
+)
+
+thanks_please = engine.should_convert_opening(["فاشىنس", "حمثشسث"], "windows-101")
+assert_eq(
+    "opening thanks please",
+    thanks_please["convert"] and thanks_please["converted"] == "thanks please",
     True,
 )
 
@@ -53,7 +68,9 @@ assert_eq("mac z is ظ", engine.convert("z", "mac-arabic"), "ظ")
 assert_eq("windows z is ئ", engine.convert("z", "windows-101"), "ئ")
 
 assert_eq("arabic dictionary loaded", len(engine.ARABIC_WORD_SET) > 5000, True)
-assert_eq("english dictionary loaded", len(engine.ENGLISH_WORD_SET) > 5000, True)
+assert_eq("english dictionary loaded", len(engine.ENGLISH_WORD_SET) > 40000, True)
+assert_eq("freq word meeting present", "meeting" in engine.ENGLISH_WORD_SET, True)
+assert_eq("name john present", "john" in engine.ENGLISH_WORD_SET, True)
 assert_eq("freq word في present", "في" in engine.ARABIC_WORD_SET, True)
 assert_eq("freq word please present", "please" in engine.ENGLISH_WORD_SET, True)
 assert_eq("egyptian ازيك present", "ازيك" in engine.ARABIC_WORD_SET, True)
