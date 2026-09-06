@@ -24,13 +24,17 @@ export const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ lang }) => {
   // Automatic cycle ref
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const resetAndPlay = () => {
+  const startScenario = (next: DemoScenario) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setDisplayedText('');
-    setCurrentLayout(scenario.startLayout);
+    setCurrentLayout(next.startLayout);
     setStep(0);
     setLastFlippedWord(null);
     setIsTyping(true);
+  };
+
+  const resetAndPlay = () => {
+    startScenario(scenario);
   };
 
   useEffect(() => {
@@ -152,7 +156,10 @@ export const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ lang }) => {
             <button
               key={sc.id}
               type="button"
-              onClick={() => setActiveScenarioIndex(idx)}
+              onClick={() => {
+                setActiveScenarioIndex(idx);
+                startScenario(sc);
+              }}
               className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                 activeScenarioIndex === idx
                   ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs'
