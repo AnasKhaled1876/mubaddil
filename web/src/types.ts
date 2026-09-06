@@ -11,6 +11,7 @@ export interface DemoScenario {
   contextAr: string;
   contextEn: string;
   app: 'whatsapp' | 'slack' | 'outlook';
+  startLayout: 'ENG' | 'عربي';
 }
 
 export interface FaqItem {

@@ -27,7 +27,7 @@ export const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ lang }) => {
   const resetAndPlay = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setDisplayedText('');
-    setCurrentLayout('ENG');
+    setCurrentLayout(scenario.startLayout);
     setStep(0);
     setLastFlippedWord(null);
     setIsTyping(true);
@@ -78,7 +78,7 @@ export const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ lang }) => {
     } else if (step === 1) {
       // Step 1: Flip word 1! Instant space hit -> layout switches to عربي, word converts
       setDisplayedText(word1Fixed + ' ');
-      setCurrentLayout(scenario.id === 'english_reverse' ? 'ENG' : 'عربي');
+      setCurrentLayout(scenario.startLayout === 'ENG' ? 'عربي' : 'ENG');
       setLastFlippedWord(word1Fixed);
       timerRef.current = setTimeout(() => {
         setStep(2);
