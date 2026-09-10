@@ -44,6 +44,13 @@ export const Footer: React.FC<FooterProps> = ({ lang, onOpenHtmlModal }) => {
             </button>
 
             <a
+              href="/privacy.html"
+              className="hover:text-neutral-900 dark:hover:text-white transition-colors"
+            >
+              {isAr ? 'سياسة الخصوصية' : 'Privacy'}
+            </a>
+
+            <a
               href="https://github.com/AnasKhaled1876/mubaddil"
               target="_blank"
               rel="noopener noreferrer"
