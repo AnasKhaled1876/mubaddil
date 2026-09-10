@@ -16,10 +16,21 @@ Egyptian Arabic
   https://huggingface.co/datasets/arbml/NileULex
   single-token Egyptian entries (insult-style ابن/ابو phrases skipped)
 
-English
+English (Arabic-layout → English detection)
+- hermitdave/FrequencyWords (OpenSubtitles-derived)
+  https://github.com/hermitdave/FrequencyWords
+  content/2018/en/en_50k.txt (50,000 most frequent English tokens)
 - first20hours/google-10000-english (Google Trillion Word Corpus)
   https://github.com/first20hours/google-10000-english
-  google-10000-english-usa.txt
+  google-10000-english.txt, google-10000-english-usa.txt,
+  google-10000-english-no-swears.txt
+- dominictarr/random-name first-names list (common English given names)
+  https://github.com/dominictarr/random-name
+- Office / chat seeds (hello, please, thanks, meeting, attached, report, …)
+
+Rebuild with: python3 scripts/build_english_dictionary.py
+(dwyl/english-words ~370k is not merged — too many rare tokens would
+false-trigger on leftover Arabic that is not in the Arabic list.)
 
 Arabic personal names
 - native/mubaddil/data/arabic_names.txt (أنس خالد محمد صابر and common first names)

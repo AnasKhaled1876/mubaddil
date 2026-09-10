@@ -24,6 +24,11 @@ assert("سلام from english", KF.convert("hgsghl", "windows-101"), "السلا
 assert("عليكم from english", KF.convert("ugd;l", "windows-101"), "عليكم");
 assert("مرحبا from english", KF.convert("lvpfh", "windows-101"), "مرحبا");
 assert("hello from arabic", KF.convert("اثممخ", "windows-101"), "hello");
+assert("there from arabic", KF.convert("فاثقث", "windows-101"), "there");
+assert("thanks from arabic", KF.convert("فاشىنس", "windows-101"), "thanks");
+assert("please from arabic", KF.convert("حمثشسث", "windows-101"), "please");
+assert("meeting from arabic", KF.convert("ةثثفهىل", "windows-101"), "meeting");
+assert("tomorrow from arabic", KF.convert("فخةخققخص", "windows-101"), "tomorrow");
 assert("ما from lh", KF.convert("lh", "windows-101"), "ما");
 
 const greeting = KF.shouldConvert("hgsghl", "windows-101");
@@ -56,6 +61,9 @@ assert("egyptian كده present", KF.ARABIC_WORDS.has("كده") ? "yes" : "no", 
 assert("egyptian دلوقتي present", KF.ARABIC_WORDS.has("دلوقتي") ? "yes" : "no", "yes");
 assert("name صابر present", KF.ARABIC_WORDS.has("صابر") ? "yes" : "no", "yes");
 assert("name أنس present", KF.ARABIC_WORDS.has("أنس") ? "yes" : "no", "yes");
+assert("english dict expanded", KF.ENGLISH_WORDS.size > 40000 ? "yes" : "no", "yes");
+assert("meeting present", KF.ENGLISH_WORDS.has("meeting") ? "yes" : "no", "yes");
+assert("john present", KF.ENGLISH_WORDS.has("john") ? "yes" : "no", "yes");
 
 if (fails.length) {
   console.error(fails.join("\n"));

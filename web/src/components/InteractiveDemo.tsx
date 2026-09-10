@@ -24,13 +24,17 @@ export const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ lang }) => {
   // Automatic cycle ref
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const resetAndPlay = () => {
+  const startScenario = (next: DemoScenario) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setDisplayedText('');
-    setCurrentLayout('ENG');
+    setCurrentLayout(next.startLayout);
     setStep(0);
     setLastFlippedWord(null);
     setIsTyping(true);
+  };
+
+  const resetAndPlay = () => {
+    startScenario(scenario);
   };
 
   useEffect(() => {
@@ -78,7 +82,7 @@ export const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ lang }) => {
     } else if (step === 1) {
       // Step 1: Flip word 1! Instant space hit -> layout switches to عربي, word converts
       setDisplayedText(word1Fixed + ' ');
-      setCurrentLayout(scenario.id === 'english_reverse' ? 'ENG' : 'عربي');
+      setCurrentLayout(scenario.startLayout === 'ENG' ? 'عربي' : 'ENG');
       setLastFlippedWord(word1Fixed);
       timerRef.current = setTimeout(() => {
         setStep(2);
@@ -152,7 +156,10 @@ export const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ lang }) => {
             <button
               key={sc.id}
               type="button"
-              onClick={() => setActiveScenarioIndex(idx)}
+              onClick={() => {
+                setActiveScenarioIndex(idx);
+                startScenario(sc);
+              }}
               className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                 activeScenarioIndex === idx
                   ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs'
