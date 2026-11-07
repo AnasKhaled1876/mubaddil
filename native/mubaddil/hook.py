@@ -1,3 +1,4 @@
+import os
 import threading
 import time
 
@@ -7,6 +8,21 @@ from . import engine, ime, inject
 
 SEPARATOR_CHARS = set(" \t!?()<>")
 MAX_OPENING_WORDS = 2
+
+
+_DEBUG = bool(os.environ.get("MUBADDIL_DEBUG"))
+
+
+def _trace(*parts) -> None:
+    if not _DEBUG:
+        return
+    try:
+        from .paths import log_file
+
+        with open(log_file().with_name("debug.log"), "a", encoding="utf-8") as fh:
+            fh.write(f"{time.time():.3f} " + " ".join(str(p) for p in parts) + "\n")
+    except OSError:
+        pass
 
 
 class Watcher:
@@ -67,6 +83,7 @@ class Watcher:
         self._modifiers.discard(key)
 
     def _rearm_field(self) -> None:
+        _trace("rearm")
         self.armed_focus = ime.focus_token()
         self.field_done = False
         self.opening_words = []
@@ -93,6 +110,7 @@ class Watcher:
         self._cancel_timers()
 
     def on_press(self, key) -> None:
+        _trace("press", repr(key), "injecting" if self.injecting else "", "done" if self.field_done else "", "buf=" + "".join(self.buffer))
         if self.injecting:
             return
         if key in {
@@ -209,6 +227,7 @@ class Watcher:
                 "min_length": self.config.get("min_length", 3),
             },
         )
+        _trace("decision", words, layout_id, decision)
         if not decision.get("convert"):
             if wait_for_more:
                 return

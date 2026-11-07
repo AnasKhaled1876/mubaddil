@@ -46,6 +46,7 @@ function Save-Window([IntPtr]$h, [string]$name) {
 }
 
 $exe = Join-Path $Native "dist\Mubaddil\Mubaddil.exe"
+$env:MUBADDIL_DEBUG = "1"
 $proc = Start-Process $exe -PassThru
 $deadline = (Get-Date).AddSeconds(45)
 while ((Get-Date) -lt $deadline) {
@@ -119,6 +120,8 @@ Start-Sleep -Milliseconds 500
 $typed = (Get-Clipboard -Raw)
 Write-Host "Notepad text: [$typed]"
 if (Test-Path $log) { Write-Host "error.log:"; Get-Content $log }
+$dbg = Join-Path $env:LOCALAPPDATA "Mubaddil\debug.log"
+if (Test-Path $dbg) { Write-Host "debug.log:"; Get-Content $dbg | Select-Object -Last 80 }
 $cfg = Join-Path $env:APPDATA "Mubaddil"
 if (Test-Path $cfg) { Get-ChildItem $cfg | ForEach-Object { Write-Host "config $($_.Name):"; Get-Content $_.FullName } }
 Get-Process notepad -ErrorAction SilentlyContinue | Stop-Process -Force
