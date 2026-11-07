@@ -65,10 +65,36 @@ if ($proc.MainWindowHandle -eq [IntPtr]::Zero) {
     throw "Mubaddil started but showed no window within 45s."
 }
 Start-Sleep -Seconds 3
+(New-Object -ComObject Shell.Application).MinimizeAll()
+Start-Sleep -Seconds 2
+$second0 = Start-Process $exe -PassThru   # brings our window back to the front
+Start-Sleep -Seconds 3
+$proc.Refresh()
 [void][Win]::SetForegroundWindow($proc.MainWindowHandle)
 Start-Sleep -Seconds 1
 Save-Screen "01-desktop"
 Save-Window $proc.MainWindowHandle "01-window"
+
+# Demo: click into the "try it" box and type Arabic meant as English keys.
+$r = New-Object Win+RECT
+[void][Win]::GetWindowRect($proc.MainWindowHandle, [ref]$r)
+[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point (($r.Left + $r.Right) / 2), ($r.Top + 420)
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class Mouse {
+  [DllImport("user32.dll")] public static extern void mouse_event(int f, int x, int y, int d, int e);
+}
+"@
+[Mouse]::mouse_event(0x0002, 0, 0, 0, 0); [Mouse]::mouse_event(0x0004, 0, 0, 0, 0)
+Start-Sleep -Milliseconds 500
+foreach ($ch in "hgsghl ".ToCharArray()) {
+    [System.Windows.Forms.SendKeys]::SendWait([string]$ch)
+    Start-Sleep -Milliseconds 120
+}
+Start-Sleep -Seconds 3
+Save-Screen "02-desktop"
+Save-Window $proc.MainWindowHandle "02-window"
 
 # A second launch must bring the existing window back, not start a new copy.
 $second = Start-Process $exe -PassThru

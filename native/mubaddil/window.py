@@ -49,6 +49,23 @@ def show() -> None:
         return
 
 
+def _set_icon(root) -> None:
+    from .paths import bundle_dir
+
+    for path in (
+        bundle_dir() / "assets" / "icon.png",
+        Path(__file__).resolve().parents[1] / "assets" / "icon.png",
+    ):
+        if path.exists():
+            try:
+                image = tk.PhotoImage(file=str(path))
+                root.iconphoto(True, image)
+                root._mubaddil_icon = image  # keep a reference
+            except tk.TclError:
+                pass
+            return
+
+
 def close() -> None:
     root = SESSION.get("root")
     if root is None:
@@ -65,6 +82,7 @@ def open_settings(config: dict, watcher, on_quit=None, start_hidden: bool = Fals
     root = tk.Tk()
     SESSION["root"] = root
     root.title("مُبَدِل — Mubaddil")
+    _set_icon(root)
     root.configure(bg=PAPER)
     root.minsize(460, 520)
     root.geometry("520x580")
@@ -213,13 +231,21 @@ def open_settings(config: dict, watcher, on_quit=None, start_hidden: bool = Fals
 
     tk.Label(
         card,
-        text="جرّب هنا: اكتب hgsghl ثم مسافة — Try it: type hgsghl then Space",
+        text="جرّب هنا: اكتب hgsghl ثم مسافة",
         bg=PANEL,
         fg=MUTED,
         anchor="e",
     ).pack(fill="x", padx=16)
+    tk.Label(
+        card,
+        text="Try it: type hgsghl then Space",
+        bg=PANEL,
+        fg=MUTED,
+        anchor="w",
+    ).pack(fill="x", padx=16)
     test = tk.Text(card, height=4, font=("Segoe UI", 16), wrap="word")
     test.pack(fill="both", expand=True, padx=16, pady=(0, 8))
+    SESSION["test"] = test
 
     tk.Label(
         card,
