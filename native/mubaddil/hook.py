@@ -130,6 +130,10 @@ class Watcher:
             self._modifiers.add(key)
             return
 
+        if self._is_undo(key):
+            self.undo()
+            return
+
         self._refresh_field()
 
         if key == keyboard.Key.tab:
@@ -137,8 +141,6 @@ class Watcher:
             return
 
         if self._mods_blocking():
-            if self._is_undo(key):
-                self.undo()
             self.buffer.clear()
             self._cancel_timers()
             return
@@ -181,7 +183,8 @@ class Watcher:
 
     def _is_undo(self, key) -> bool:
         ch = getattr(key, "char", None)
-        return ch in {"z", "Z"} and bool(
+        is_z = ch in {"z", "Z"} or getattr(key, "vk", None) == 0x5A
+        return is_z and bool(
             self._modifiers
             & {
                 keyboard.Key.alt,
