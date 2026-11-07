@@ -37,6 +37,7 @@ class Watcher:
         self._idle: threading.Timer | None = None
         self._pending: threading.Timer | None = None
         self._modifiers = set()
+        self._held = set()
         self.last_fix: dict | None = None
         self.lock = threading.Lock()
         self.armed_focus: str | None = None
@@ -81,6 +82,7 @@ class Watcher:
 
     def on_release(self, key) -> None:
         self._modifiers.discard(key)
+        self._held.discard(key)
 
     def _rearm_field(self) -> None:
         _trace("rearm")
@@ -113,6 +115,7 @@ class Watcher:
         _trace("press", repr(key), "injecting" if self.injecting else "", "done" if self.field_done else "", "buf=" + "".join(self.buffer))
         if self.injecting:
             return
+        self._held.add(key)
         if key in {
             keyboard.Key.cmd,
             keyboard.Key.cmd_l,
@@ -246,7 +249,18 @@ class Watcher:
 
             log_exception(exc)
 
+    def _wait_for_keys_up(self, timeout: float = 0.4) -> None:
+        """Windows drops input we inject while the trigger key is still down."""
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            held = {k for k in self._held if k not in self._modifiers}
+            if not held:
+                break
+            time.sleep(0.01)
+        time.sleep(0.03)
+
     def _apply_inner(self, decision: dict, had_separator: bool) -> None:
+        self._wait_for_keys_up()
         with self.lock:
             if self.field_done:
                 return
@@ -297,6 +311,15 @@ class Watcher:
     def undo(self) -> None:
         fix = self.last_fix
         if not fix or self.injecting:
+            return
+        threading.Thread(target=self._undo_after_release, args=(fix,), daemon=True).start()
+
+    def _undo_after_release(self, fix: dict) -> None:
+        deadline = time.time() + 1.0
+        while self._modifiers and time.time() < deadline:
+            time.sleep(0.01)
+        self._wait_for_keys_up()
+        if self.injecting or self.last_fix is not fix:
             return
         self.injecting = True
         try:

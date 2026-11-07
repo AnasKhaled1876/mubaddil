@@ -119,6 +119,15 @@ Save-Screen "03-notepad"
 Start-Sleep -Milliseconds 500
 $typed = (Get-Clipboard -Raw)
 Write-Host "Notepad text: [$typed]"
+[System.Windows.Forms.SendKeys]::SendWait("{END}")
+Start-Sleep -Milliseconds 300
+[System.Windows.Forms.SendKeys]::SendWait("%z")
+Start-Sleep -Seconds 2
+[System.Windows.Forms.SendKeys]::SendWait("^a")
+[System.Windows.Forms.SendKeys]::SendWait("^c")
+Start-Sleep -Milliseconds 500
+$undone = (Get-Clipboard -Raw)
+Write-Host "After Alt+Z: [$undone]"
 if (Test-Path $log) { Write-Host "error.log:"; Get-Content $log }
 $dbg = Join-Path $env:LOCALAPPDATA "Mubaddil\debug.log"
 if (Test-Path $dbg) { Write-Host "debug.log:"; Get-Content $dbg | Select-Object -Last 80 }
@@ -162,4 +171,5 @@ Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 1
 Probe-Notepad "app stopped"
 if (-not $fixOk) { throw "Correction in Notepad produced [$typed], expected [السلام ]" }
+if ($undone.Trim() -ne "hgsghl") { throw "Alt+Z produced [$undone], expected [hgsghl ]" }
 Get-ChildItem $out
