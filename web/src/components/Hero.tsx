@@ -10,21 +10,45 @@ interface HeroProps {
 }
 
 type AnimationStage = 'typing_gibberish' | 'reaction' | 'deleting' | 'typing_solution' | 'ready';
+type Direction = 'en-ar' | 'ar-en';
+
+function heroCopy(isAr: boolean, direction: Direction) {
+  if (direction === 'ar-en') {
+    return {
+      gibberishText: 'اثممخ فاثقث...',
+      reaction: isAr ? 'نسيت تقلب الكيبورد!' : 'Forgot to switch the keyboard!',
+      meant: isAr
+        ? '(كتبت بالعربي وكان قصدك: hello there)'
+        : '(Typed on Arabic layout when you meant English)',
+      solutionTextPart1: isAr ? 'كتبت إنجليزي وطلع عربي؟' : 'Typed English & got Arabic?',
+      solutionTextPart2: isAr
+        ? 'مبدّل بيصلحه أول ما تدوس مسافة.'
+        : 'Mubaddil fixes it the second you hit Space.',
+    };
+  }
+  return {
+    gibberishText: 'hgsghl ugd;l...',
+    reaction: isAr ? 'نسيت تقلب الكيبورد!' : 'Forgot to switch the keyboard!',
+    meant: isAr
+      ? '(كتبت بالإنجليزي وكان قصدك: السلام عليكم)'
+      : '(Typed on English layout when you meant Arabic)',
+    solutionTextPart1: isAr ? 'كتبت عربي وطلع إنجليزي؟' : 'Typed Arabic & got English?',
+    solutionTextPart2: isAr
+      ? 'مبدّل بيصلحه أول ما تدوس مسافة.'
+      : 'Mubaddil fixes it the second you hit Space.',
+  };
+}
 
 export const Hero: React.FC<HeroProps> = ({ lang, onDownloadClick, onScrollToDemo }) => {
   const isAr = lang === 'ar';
 
   const [stage, setStage] = useState<AnimationStage>('typing_gibberish');
+  const [direction, setDirection] = useState<Direction>('en-ar');
   const [displayedText, setDisplayedText] = useState<string>('');
   const [solutionPart2, setSolutionPart2] = useState<string>('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Script text definitions - Snappy, Short & Ultra-Fast Comprehension
-  const gibberishText = 'hgsghl ugd;l...';
-  const solutionTextPart1 = isAr ? 'كتبت عربي وطلع إنجليزي؟' : 'Typed Arabic & got English?';
-  const solutionTextPart2 = isAr
-    ? 'مبدّل بيصلحه أول ما تدوس مسافة.'
-    : 'Mubaddil fixes it the second you hit Space.';
+  const copy = heroCopy(isAr, direction);
+  const { gibberishText, solutionTextPart1, solutionTextPart2 } = copy;
 
   const startAnimation = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -86,12 +110,19 @@ export const Hero: React.FC<HeroProps> = ({ lang, onDownloadClick, onScrollToDem
           setStage('ready');
         }, 350);
       }
+    } else if (stage === 'ready') {
+      timerRef.current = setTimeout(() => {
+        setDirection((prev) => (prev === 'en-ar' ? 'ar-en' : 'en-ar'));
+        setDisplayedText('');
+        setSolutionPart2('');
+        setStage('typing_gibberish');
+      }, 4800);
     }
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [stage, displayedText, solutionPart2]);
+  }, [stage, displayedText, solutionPart2, gibberishText, solutionTextPart1, solutionTextPart2]);
 
   const handleSkip = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -123,7 +154,7 @@ export const Hero: React.FC<HeroProps> = ({ lang, onDownloadClick, onScrollToDem
               <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-rose-100/90 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-200 shadow-md backdrop-blur-xs">
                 <span className="text-2xl sm:text-3xl">🤦‍♂️</span>
                 <span className="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight">
-                  {isAr ? 'نسيت تقلب الكيبورد!' : 'Forgot to switch the keyboard!'}
+                  {copy.reaction}
                 </span>
                 {stage === 'deleting' && (
                   <span className="font-mono text-xs sm:text-sm bg-rose-200 dark:bg-rose-900 text-rose-900 dark:text-rose-100 px-2 py-0.5 rounded-lg animate-pulse font-bold ml-1">
@@ -134,16 +165,14 @@ export const Hero: React.FC<HeroProps> = ({ lang, onDownloadClick, onScrollToDem
 
               {/* Subtitle explaining the error with smooth fade */}
               <p className="mt-2 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 font-medium">
-                {isAr
-                  ? '(كتبت بالإنجليزي وكان قصدك: السلام عليكم)'
-                  : '(Typed on English layout when you meant Arabic)'}
+                {copy.meant}
               </p>
             </div>
 
             {/* The Gibberish Typography */}
             <h1
               className="text-3xl sm:text-5xl md:text-6xl font-mono font-bold tracking-wider text-rose-600 dark:text-rose-400 select-none flex items-center justify-center"
-              dir="ltr"
+              dir={direction === 'ar-en' ? 'rtl' : 'ltr'}
             >
               <span>{displayedText}</span>
               <span className="inline-block w-1 h-9 sm:h-14 bg-rose-500 ml-1 animate-pulse" />

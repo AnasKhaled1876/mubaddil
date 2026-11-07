@@ -45,6 +45,17 @@ for word in ("السلام", "محمد", "خالد", "أنس", "صابر", "از
 
 # English typed on Arabic layout
 assert_eq("reply hello", typed("اثممخ")["convert"] and typed("اثممخ")["converted"] == "hello", True)
+assert_eq("reply there", typed("فاثقث")["converted"], "there")
+assert_eq("reply thanks", typed("فاشىنس")["converted"], "thanks")
+assert_eq("reply please", typed("حمثشسث")["converted"], "please")
+assert_eq("reply meeting", typed("ةثثفهىل")["converted"], "meeting")
+assert_eq("reply tomorrow", typed("فخةخققخص")["converted"], "tomorrow")
+assert_eq("reply email", typed("ثةشهم")["converted"], "email")
+assert_eq("reply attached", typed("شففشؤاثي")["converted"], "attached")
+opening_en = engine.should_convert_opening(["اثممخ", "فاثقث"], "windows-101")
+assert_eq("opening hello there", opening_en.get("converted"), "hello there")
+opening_mail = engine.should_convert_opening(["فاشىنس", "حمثشسث"], "windows-101")
+assert_eq("opening thanks please", opening_mail.get("converted"), "thanks please")
 
 # Search-like noise should not flip
 assert_eq("search noise qwerty", typed("qwerty")["convert"], False)
