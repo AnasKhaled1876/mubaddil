@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
   CI smoke test: start the built exe, check it stays up and shows a window,
   then save screenshots to native/dist/screenshots/.
@@ -95,6 +95,31 @@ foreach ($ch in "hgsghl ".ToCharArray()) {
 Start-Sleep -Seconds 3
 Save-Screen "02-desktop"
 Save-Window $proc.MainWindowHandle "02-window"
+
+# Same check in another app: Notepad, read back through the clipboard.
+$np = Start-Process notepad -PassThru
+Start-Sleep -Seconds 3
+$np.Refresh()
+$npWin = (Get-Process notepad | Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1).MainWindowHandle
+[void][Win]::SetForegroundWindow($npWin)
+Start-Sleep -Seconds 1
+[void][Win]::GetWindowRect($npWin, [ref]$r)
+[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point (($r.Left + $r.Right) / 2), (($r.Top + $r.Bottom) / 2)
+[Mouse]::mouse_event(0x0002, 0, 0, 0, 0); [Mouse]::mouse_event(0x0004, 0, 0, 0, 0)
+Start-Sleep -Milliseconds 500
+foreach ($ch in "hgsghl ".ToCharArray()) {
+    [System.Windows.Forms.SendKeys]::SendWait([string]$ch)
+    Start-Sleep -Milliseconds 120
+}
+Start-Sleep -Seconds 3
+Save-Screen "03-notepad"
+[System.Windows.Forms.SendKeys]::SendWait("^a")
+[System.Windows.Forms.SendKeys]::SendWait("^c")
+Start-Sleep -Milliseconds 500
+$typed = (Get-Clipboard -Raw)
+Write-Host "Notepad text: [$typed]"
+Get-Process notepad -ErrorAction SilentlyContinue | Stop-Process -Force
+if ($typed.Trim() -ne "السلام") { throw "Correction in Notepad produced [$typed], expected [السلام ]" }
 
 # A second launch must bring the existing window back, not start a new copy.
 $second = Start-Process $exe -PassThru

@@ -21,6 +21,8 @@ hiddenimports = (
         "mubaddil.ime",
         "mubaddil.tray",
         "mubaddil.hook",
+        "mubaddil.inject",
+        "mubaddil.instance",
         "mubaddil.window",
         "mubaddil.startup",
         "mubaddil.paths",

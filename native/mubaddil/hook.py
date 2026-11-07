@@ -3,7 +3,7 @@ import time
 
 from pynput import keyboard, mouse
 
-from . import engine, ime
+from . import engine, ime, inject
 
 SEPARATOR_CHARS = set(" \t!?()<>")
 MAX_OPENING_WORDS = 2
@@ -252,11 +252,7 @@ class Watcher:
         )
         self.injecting = True
         try:
-            for _ in range(delete_count):
-                self.controller.press(keyboard.Key.backspace)
-                self.controller.release(keyboard.Key.backspace)
-                time.sleep(0.001)
-            self.controller.type(typed)
+            inject.replace(self.controller, delete_count, typed)
             ime.set_lang(target, self.config.get("layout_id"))
             self.last_fix = {
                 "before": original,
@@ -267,7 +263,8 @@ class Watcher:
             }
             self.field_done = True
         finally:
-            time.sleep(0.05)
+            # Let our own injected keys drain through the hook before listening again.
+            time.sleep(0.25)
             self.injecting = False
 
     def undo(self) -> None:
@@ -276,17 +273,14 @@ class Watcher:
             return
         self.injecting = True
         try:
-            for _ in range(fix["delete_count"]):
-                self.controller.press(keyboard.Key.backspace)
-                self.controller.release(keyboard.Key.backspace)
-                time.sleep(0.001)
             extra_space = fix["after"].endswith(" ") and not fix["before"].endswith(" ")
             restore = fix["before"] + (" " if extra_space else "")
-            self.controller.type(restore)
+            inject.replace(self.controller, fix["delete_count"], restore)
             if fix.get("previous_lang"):
                 ime.set_lang(fix["previous_lang"], self.config.get("layout_id"))
             self.last_fix = None
             self.field_done = True
         finally:
-            time.sleep(0.05)
+            # Let our own injected keys drain through the hook before listening again.
+            time.sleep(0.25)
             self.injecting = False
