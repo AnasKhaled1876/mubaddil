@@ -118,6 +118,9 @@ Save-Screen "03-notepad"
 Start-Sleep -Milliseconds 500
 $typed = (Get-Clipboard -Raw)
 Write-Host "Notepad text: [$typed]"
+if (Test-Path $log) { Write-Host "error.log:"; Get-Content $log }
+$cfg = Join-Path $env:APPDATA "Mubaddil"
+if (Test-Path $cfg) { Get-ChildItem $cfg | ForEach-Object { Write-Host "config $($_.Name):"; Get-Content $_.FullName } }
 Get-Process notepad -ErrorAction SilentlyContinue | Stop-Process -Force
 if ($typed.Trim() -ne "السلام") { throw "Correction in Notepad produced [$typed], expected [السلام ]" }
 

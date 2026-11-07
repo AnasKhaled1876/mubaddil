@@ -220,6 +220,14 @@ class Watcher:
         self._pending.start()
 
     def _apply(self, decision: dict, had_separator: bool) -> None:
+        try:
+            self._apply_inner(decision, had_separator)
+        except Exception as exc:
+            from .paths import log_exception
+
+            log_exception(exc)
+
+    def _apply_inner(self, decision: dict, had_separator: bool) -> None:
         with self.lock:
             if self.field_done:
                 return

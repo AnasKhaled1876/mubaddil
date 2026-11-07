@@ -10,6 +10,16 @@ from __future__ import annotations
 import sys
 import time
 
+
+def _replace_keywise(controller, delete_count: int, text: str) -> None:
+    from pynput import keyboard
+
+    for _ in range(delete_count):
+        controller.press(keyboard.Key.backspace)
+        controller.release(keyboard.Key.backspace)
+        time.sleep(0.001)
+    controller.type(text)
+
 if sys.platform.startswith("win"):
     import ctypes
     from ctypes import wintypes
@@ -75,22 +85,28 @@ if sys.platform.startswith("win"):
             events.append(_key(scan=unit, flags=_KEYEVENTF_UNICODE | _KEYEVENTF_KEYUP))
         return events
 
-    def replace(controller, delete_count: int, text: str) -> None:
+    def _send_batch(delete_count: int, text: str) -> None:
         events = build_events(delete_count, text)
         if not events:
             return
         array = (_INPUT * len(events))(*events)
         sent = _user32.SendInput(len(events), array, ctypes.sizeof(_INPUT))
         if sent != len(events):
-            raise OSError(ctypes.get_last_error(), "SendInput was blocked")
+            raise OSError(
+                ctypes.get_last_error(),
+                f"SendInput sent {sent} of {len(events)} events (INPUT size {ctypes.sizeof(_INPUT)})",
+            )
+
+    def replace(controller, delete_count: int, text: str) -> None:
+        try:
+            _send_batch(delete_count, text)
+        except Exception as exc:
+            from .paths import log_exception
+
+            log_exception(exc)
+            _replace_keywise(controller, delete_count, text)
 
 else:
 
     def replace(controller, delete_count: int, text: str) -> None:
-        from pynput import keyboard
-
-        for _ in range(delete_count):
-            controller.press(keyboard.Key.backspace)
-            controller.release(keyboard.Key.backspace)
-            time.sleep(0.001)
-        controller.type(text)
+        _replace_keywise(controller, delete_count, text)
