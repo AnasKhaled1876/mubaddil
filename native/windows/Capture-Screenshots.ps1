@@ -125,7 +125,29 @@ if (Test-Path $dbg) { Write-Host "debug.log:"; Get-Content $dbg | Select-Object 
 $cfg = Join-Path $env:APPDATA "Mubaddil"
 if (Test-Path $cfg) { Get-ChildItem $cfg | ForEach-Object { Write-Host "config $($_.Name):"; Get-Content $_.FullName } }
 Get-Process notepad -ErrorAction SilentlyContinue | Stop-Process -Force
-if ($typed.Trim() -ne "السلام") { throw "Correction in Notepad produced [$typed], expected [السلام ]" }
+$fixOk = ($typed.Trim() -eq "السلام")
+
+# Probe: does SendInput from Python reach Notepad, with and without Mubaddil running?
+$py = Join-Path $Native ".venv\Scripts\python.exe"
+$probe = Join-Path $PSScriptRoot "ci\inject_probe.py"
+function Probe-Notepad([string]$label) {
+    $n = Start-Process notepad -PassThru
+    Start-Sleep -Seconds 2
+    $h = (Get-Process notepad | Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1).MainWindowHandle
+    [void][Win]::SetForegroundWindow($h)
+    Start-Sleep -Milliseconds 500
+    [System.Windows.Forms.SendKeys]::SendWait("x")
+    & $py $probe batch
+    & $py $probe batch-del
+    & $py $probe keywise
+    Start-Sleep -Milliseconds 500
+    [System.Windows.Forms.SendKeys]::SendWait("^a")
+    [System.Windows.Forms.SendKeys]::SendWait("^c")
+    Start-Sleep -Milliseconds 300
+    Write-Host "PROBE [$label]: [$(Get-Clipboard -Raw)]  (expect xACDEF)"
+    Get-Process notepad -ErrorAction SilentlyContinue | Stop-Process -Force
+}
+Probe-Notepad "app running"
 
 # A second launch must bring the existing window back, not start a new copy.
 $second = Start-Process $exe -PassThru
@@ -136,5 +158,8 @@ $proc.Refresh()
 if ($proc.HasExited) { throw "Running instance died after a second launch." }
 
 Write-Host "Window title: $($proc.MainWindowTitle)"
-Stop-Process -Id $proc.Id -Force
+Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 1
+Probe-Notepad "app stopped"
+if (-not $fixOk) { throw "Correction in Notepad produced [$typed], expected [السلام ]" }
 Get-ChildItem $out
