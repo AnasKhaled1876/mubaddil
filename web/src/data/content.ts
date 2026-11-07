@@ -70,4 +70,12 @@ export const faqs: FaqItem[] = [
     answerAr: 'من أيقونة مبدّل الصغيرة في شريط المهام (جنب الساعة): كليك يمين عليها هتلاقي خيارين بس: «شغّال» للتشغيل أو الإيقاف المؤقت، و«خروج» لقفل البرنامج. مفيش إعدادات معقدة ولا دوشة.',
     answerEn: 'Right-click the small Mubaddil tray icon next to your Windows clock: you will find only two options: "Active" (toggle on/off) and "Quit". No complex menus or clutter.',
   },
+  {
+    questionAr: 'كاسبرسكي مسح الملف أول ما نزل. فيروس؟',
+    questionEn: 'Kaspersky deleted the file as soon as I downloaded it. Is it a virus?',
+    answerAr:
+      'لا. الملف مش موقع بشهادة ويندوز مدفوعة لسه، وكاسبرسكي بيمسح البرامج الجديدة المجهولة بسرعة. متطفّيش الحماية. من كاسبرسكي: التقارير أو الحجر الصحي ← استعادة Mubaddil-Setup.exe ← الإعدادات ← التهديدات والاستثناءات ← أضف الملف، وبعد التثبيت أضف مجلد مبدّل في AppData\\Local\\Mubaddil. لو ويندوز قال Windows protected your PC: More info ← Run anyway.',
+    answerEn:
+      'No. The setup is not code-signed yet, so Kaspersky often quarantines brand-new unknown programs. Do not turn protection off. In Kaspersky: Reports or Quarantine → Restore Mubaddil-Setup.exe → Settings → Threats and exclusions → add the file, then after install add the Mubaddil folder in AppData\\Local\\Mubaddil. If Windows says “Windows protected your PC”: More info → Run anyway.',
+  },
 ];

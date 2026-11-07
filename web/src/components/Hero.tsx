@@ -212,6 +212,15 @@ export const Hero: React.FC<HeroProps> = ({ lang, onDownloadClick, onScrollToDem
                 <span>{isAr ? 'تحميل مباشر لويندوز (مجاني)' : 'Download for Windows (Free)'}</span>
               </a>
 
+              <a
+                href="#antivirus"
+                className="mt-3 text-xs text-neutral-500 dark:text-neutral-400 hover:text-[#166534] dark:hover:text-emerald-400 underline underline-offset-2"
+              >
+                {isAr
+                  ? 'كاسبرسكي مسح الملف؟ افتح الملاحظة تحت التحميل'
+                  : 'Kaspersky deleted the file? Open the note under Download'}
+              </a>
+
               {/* Micro reassurances */}
               <div className="flex items-center gap-4 text-xs text-neutral-500 dark:text-neutral-400 mt-4">
                 <span className="flex items-center gap-1">

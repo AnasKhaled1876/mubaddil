@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Download, CheckCircle2, Sparkles, ExternalLink } from 'lucide-react';
 import { Language } from '../types';
 import { SETUP_FILE, SETUP_NAME } from '../data/download';
+import { AntivirusNote } from './AntivirusNote';
 
 interface DownloadSectionProps {
   lang: Language;
@@ -64,11 +65,13 @@ export const DownloadSection: React.FC<DownloadSectionProps> = ({ lang }) => {
                 <CheckCircle2 className="w-4 h-4" />
                 <span>
                   {isAr
-                    ? 'بدأ التحميل. دبل كليك على الملف.'
-                    : 'Download started. Double-click the file.'}
+                    ? 'بدأ التحميل. دبل كليك على الملف. لو كاسبرسكي مسحه، افتح المربع اللي تحت.'
+                    : 'Download started. Double-click the file. If Kaspersky removed it, open the note below.'}
                 </span>
               </div>
             )}
+
+            <AntivirusNote lang={lang} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-neutral-100 dark:border-neutral-800 text-left rtl:text-right">
