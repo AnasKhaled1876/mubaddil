@@ -79,7 +79,7 @@ Save-Window $proc.MainWindowHandle "01-window"
 # Demo: click into the "try it" box and type Arabic meant as English keys.
 $r = New-Object Win+RECT
 [void][Win]::GetWindowRect($proc.MainWindowHandle, [ref]$r)
-[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point (($r.Left + $r.Right) / 2), ($r.Top + 420)
+[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point (($r.Left + $r.Right) / 2), ($r.Top + 290)
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;

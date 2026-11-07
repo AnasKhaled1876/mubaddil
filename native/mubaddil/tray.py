@@ -1,3 +1,4 @@
+import os
 import sys
 import threading
 from pathlib import Path
@@ -43,20 +44,18 @@ def run_tray() -> None:
         config["enabled"] = not config.get("enabled", True)
         persist()
 
+    ui = {"module": None}
+
     def quit_app(icon=None, item=None):
         watcher.stop()
         if app_icon["icon"]:
             app_icon["icon"].stop()
-        if sys.platform.startswith("win"):
-            from . import window
-
-            window.close()
+        if ui["module"] is not None:
+            ui["module"].close()
 
     def open_window(icon=None, item=None):
-        if sys.platform.startswith("win"):
-            from . import window
-
-            window.show()
+        if ui["module"] is not None:
+            ui["module"].show()
 
     menu = pystray.Menu(
         pystray.MenuItem(
@@ -94,15 +93,26 @@ def run_tray() -> None:
     from .paths import log_exception
 
     icon.run_detached()
+    # Start in the tray only for a sign-in launch after the first run; the
+    # very first launch always shows the window.
+    start_hidden = bool(config.get("window_seen")) and launched_at_sign_in()
+    config["window_seen"] = True
+    ime.save_config(config)
+    listen_for_show_requests(lambda: ui["module"] and ui["module"].show())
+    try:
+        from . import webui
+
+        if os.environ.get("MUBADDIL_TK_UI") or not webui.available():
+            raise RuntimeError("WebView2 UI unavailable")
+        ui["module"] = webui
+        webui.open_settings(config, watcher, on_quit=quit_app, start_hidden=start_hidden)
+        return
+    except Exception as exc:  # fall back to the classic Tk window
+        log_exception(exc)
     try:
         from . import window
 
-        listen_for_show_requests(window.show)
-        # Start in the tray only for a sign-in launch after the first run; the
-        # very first launch always shows the window.
-        start_hidden = bool(config.get("window_seen")) and launched_at_sign_in()
-        config["window_seen"] = True
-        ime.save_config(config)
+        ui["module"] = window
         window.open_settings(
             config,
             watcher,

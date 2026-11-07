@@ -34,7 +34,7 @@
       <uap:VisualElements
         DisplayName="مُبَدِل"
         Description="Stops you when the keyboard language is wrong, remaps the keys, and switches the layout."
-        BackgroundColor="#f3eadb"
+        BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
         <uap:DefaultTile

@@ -8,6 +8,8 @@ from . import engine, ime, inject
 
 SEPARATOR_CHARS = set(" \t!?()<>")
 MAX_OPENING_WORDS = 2
+# Shortest word each sensitivity level will convert.
+SENSITIVITY_MIN_LENGTH = {"conservative": 4, "balanced": 3, "aggressive": 2}
 
 
 _DEBUG = bool(os.environ.get("MUBADDIL_DEBUG"))
@@ -230,7 +232,10 @@ class Watcher:
             words,
             layout_id,
             {
-                "min_length": self.config.get("min_length", 3),
+                "min_length": SENSITIVITY_MIN_LENGTH.get(
+                    self.config.get("sensitivity", "balanced"),
+                    self.config.get("min_length", 3),
+                ),
             },
         )
         _trace("decision", words, layout_id, decision)
