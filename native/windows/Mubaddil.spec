@@ -56,7 +56,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     console=False,
     icon=os.path.join(native_dir, "assets", "icon.ico"),
 )
@@ -65,6 +65,6 @@ coll = COLLECT(
     a.binaries,
     a.datas,
     strip=False,
-    upx=True,
+    upx=False,
     name="Mubaddil",
 )

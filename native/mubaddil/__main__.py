@@ -51,9 +51,10 @@ def main() -> int:
         print("ok" if ok else "failed")
         return 0 if ok else 1
     if command == "run":
-        from .instance import acquire_single_instance
+        from .instance import acquire_single_instance, signal_running_instance
 
         if not acquire_single_instance():
+            signal_running_instance()
             return 0
         if sys.platform == "darwin" and not ime.prompt_mac_accessibility():
             print(

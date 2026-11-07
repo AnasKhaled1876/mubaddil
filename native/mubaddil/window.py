@@ -49,11 +49,22 @@ def show() -> None:
         return
 
 
-def open_settings(config: dict, watcher, on_quit=None) -> None:
+def close() -> None:
+    root = SESSION.get("root")
+    if root is None:
+        return
+    SESSION["root"] = None
+    try:
+        root.after(0, root.destroy)
+    except Exception:
+        return
+
+
+def open_settings(config: dict, watcher, on_quit=None, start_hidden: bool = False) -> None:
     _prepare_tk()
     root = tk.Tk()
     SESSION["root"] = root
-    root.title("مبدّل — Mubaddil")
+    root.title("مُبَدِل — Mubaddil")
     root.configure(bg=PAPER)
     root.minsize(460, 520)
     root.geometry("520x580")
@@ -99,7 +110,7 @@ def open_settings(config: dict, watcher, on_quit=None) -> None:
     header.pack(fill="x", **pad)
     tk.Label(
         header,
-        text="مبدّل",
+        text="مُبَدِل",
         font=("Segoe UI", 26, "bold"),
         fg=INK,
         bg=PAPER,
@@ -113,6 +124,15 @@ def open_settings(config: dict, watcher, on_quit=None) -> None:
         wraplength=460,
         justify="right",
     ).pack(anchor="e")
+    tk.Label(
+        header,
+        text="Fixes text typed with the wrong keyboard layout (Arabic ⇄ English) in any app.",
+        font=("Segoe UI", 9),
+        fg=MUTED,
+        bg=PAPER,
+        wraplength=460,
+        justify="left",
+    ).pack(anchor="w")
 
     card = tk.Frame(root, bg=PANEL, highlightbackground="#e4dac8", highlightthickness=1)
     card.pack(fill="both", expand=True, padx=20, pady=8)
@@ -193,7 +213,7 @@ def open_settings(config: dict, watcher, on_quit=None) -> None:
 
     tk.Label(
         card,
-        text="جرّب هنا: اكتب hgsghl ثم مسافة",
+        text="جرّب هنا: اكتب hgsghl ثم مسافة — Try it: type hgsghl then Space",
         bg=PANEL,
         fg=MUTED,
         anchor="e",
@@ -227,8 +247,20 @@ def open_settings(config: dict, watcher, on_quit=None) -> None:
         SESSION["root"] = None
         if on_quit:
             on_quit()
-        root.destroy()
+        try:
+            root.destroy()
+        except tk.TclError:
+            pass
+
+    buttons = tk.Frame(root, bg=PAPER)
+    buttons.pack(fill="x", padx=20, pady=(0, 14))
+    ttk.Button(buttons, text="خروج — Quit", command=really_quit).pack(side="left")
+    ttk.Button(buttons, text="إخفاء في الشريط — Hide to tray", command=hide_to_tray).pack(
+        side="right"
+    )
 
     root.protocol("WM_DELETE_WINDOW", hide_to_tray)
     persist()
+    if start_hidden:
+        root.withdraw()
     root.mainloop()
