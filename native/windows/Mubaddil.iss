@@ -24,7 +24,7 @@ RestartApplications=no
 Name: uninstallprevious; Description: "Uninstall previous version / إزالة النسخة السابقة"
 
 [Messages]
-WelcomeLabel2=This installs مبدّل on this PC. It fixes typing in the wrong Arabic/English keyboard layout.%n%nNo admin password needed — double-click, Next, Finish.%n%nOn the next page, leave "Uninstall previous version" checked if an older copy is already installed.
+WelcomeLabel2=This installs مبدّل on this PC. It fixes typing in the wrong Arabic/English keyboard layout.%n%nNo admin password needed — double-click, Next, Finish.%n%nIf Kaspersky or Windows blocked the download, restore the file and allow مبدّل yourself. This setup never turns antivirus off.%n%nOn the next page, leave "Uninstall previous version" checked if an older copy is already installed.
 
 [Code]
 function UninstallRegistryPath: String;

@@ -4,6 +4,12 @@
   "installCommand": "npm install --prefix web",
   "buildCommand": "npm run build --prefix web",
   "outputDirectory": "web/dist",
+  "rewrites": [
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    }
+  ],
   "headers": [
     {
       "source": "/Mubaddil-Setup.exe",
