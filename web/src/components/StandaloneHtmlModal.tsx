@@ -37,7 +37,7 @@ export const StandaloneHtmlModal: React.FC<StandaloneHtmlModalProps> = ({
   <header class="border-b border-black/[0.06] bg-[#fafaf8]/90 backdrop-blur sticky top-0 z-50">
     <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-[#166534] text-white flex items-center justify-center font-bold text-lg">مـ</div>
+        <img src="/favicon.svg" alt="" width="36" height="36" class="w-9 h-9 rounded-xl">
         <span class="font-bold text-lg">مبدّل <span class="text-xs px-2 py-0.5 bg-emerald-100 text-[#166534] rounded-md mr-2 font-semibold">مجاني</span></span>
       </div>
       <a href="#download" class="px-4 py-2 text-sm font-semibold rounded-lg bg-[#166534] text-white hover:bg-[#14532d] transition-colors">تحميل البرنامج</a>

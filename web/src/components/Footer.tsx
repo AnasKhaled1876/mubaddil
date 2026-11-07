@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Heart, Laptop, Code, Copy, Check, ExternalLink } from 'lucide-react';
 import { Language } from '../types';
+import { BrandMark } from './BrandMark';
 
 interface FooterProps {
   lang: Language;
@@ -16,9 +17,7 @@ export const Footer: React.FC<FooterProps> = ({ lang, onOpenHtmlModal }) => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Brand & Attribution */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#166534] text-white flex items-center justify-center font-bold text-sm">
-              مـ
-            </div>
+            <BrandMark className="w-8 h-8 rounded-lg" />
             <div>
               <div className="font-bold text-neutral-900 dark:text-white text-sm">
                 {isAr ? 'مبدّل • Mubaddil' : 'Mubaddil'}

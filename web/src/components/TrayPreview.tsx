@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, X, MousePointer, Volume2, Wifi, BatteryCharging, Power } from 'lucide-react';
 import { Language } from '../types';
+import { BrandMark } from './BrandMark';
 
 interface TrayPreviewProps {
   lang: Language;
@@ -167,14 +168,14 @@ export const TrayPreview: React.FC<TrayPreviewProps> = ({ lang }) => {
                     <button
                       type="button"
                       onClick={() => setIsMenuOpen(!isMenuOpen)}
-                      className={`relative w-6 h-6 rounded flex items-center justify-center font-bold text-xs transition-all cursor-pointer ${
+                      className={`relative w-6 h-6 rounded flex items-center justify-center transition-all cursor-pointer ${
                         isTrayActive
-                          ? 'bg-[#166534] text-white ring-2 ring-emerald-400/40'
-                          : 'bg-neutral-700 text-neutral-400'
+                          ? 'ring-2 ring-emerald-400/40'
+                          : 'opacity-50 grayscale'
                       }`}
                       title={isAr ? 'مبدّل (انقر لفتح القائمة)' : 'Mubaddil (Click to open tray menu)'}
                     >
-                      <span>مـ</span>
+                      <BrandMark className="w-6 h-6 rounded" />
                       {isTrayActive && (
                         <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400" />
                       )}

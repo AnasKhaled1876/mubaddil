@@ -2,6 +2,7 @@ import React from 'react';
 import { Download, Globe, Moon, Sun } from 'lucide-react';
 import { Language, Theme } from '../types';
 import { SETUP_FILE, SETUP_NAME } from '../data/download';
+import { BrandMark } from './BrandMark';
 
 interface NavbarProps {
   lang: Language;
@@ -28,9 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Brand */}
         <a href="#" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl bg-[#166534] text-white flex items-center justify-center font-bold text-lg shadow-sm shadow-[#166534]/20 group-hover:scale-105 transition-transform">
-            <span>مـ</span>
-          </div>
+          <BrandMark className="w-9 h-9 rounded-xl shadow-sm shadow-[#166534]/20 group-hover:scale-105 transition-transform" />
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-lg tracking-tight text-neutral-900 dark:text-neutral-100">
