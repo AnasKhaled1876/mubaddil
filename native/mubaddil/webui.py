@@ -193,7 +193,7 @@ def open_settings(config: dict, watcher, on_quit=None, start_hidden: bool = Fals
         url=str(_ui_dir() / "index.html"),
         js_api=api,
         width=500,
-        height=820,
+        height=780,
         min_size=(440, 600),
         hidden=start_hidden,
         background_color="#121313" if dark else "#f4f4f2",

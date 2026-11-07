@@ -97,6 +97,15 @@ Start-Sleep -Seconds 3
 Save-Screen "02-desktop"
 Save-Window $proc.MainWindowHandle "02-window"
 
+# Switch the UI to Arabic with the language button (top corner) and capture again.
+[void][Win]::GetWindowRect($proc.MainWindowHandle, [ref]$r)
+[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point ($r.Left + 446), ($r.Top + 74)
+[Mouse]::mouse_event(0x0002, 0, 0, 0, 0); [Mouse]::mouse_event(0x0004, 0, 0, 0, 0)
+Start-Sleep -Seconds 2
+[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point 1500, 900
+Start-Sleep -Milliseconds 500
+Save-Window $proc.MainWindowHandle "04-window-ar"
+
 # Same check in another app: Notepad, read back through the clipboard.
 $np = Start-Process notepad -PassThru
 Start-Sleep -Seconds 3
