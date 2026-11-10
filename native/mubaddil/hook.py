@@ -12,7 +12,38 @@ MAX_OPENING_WORDS = 2
 SENSITIVITY_MIN_LENGTH = {"conservative": 4, "balanced": 3, "aggressive": 2}
 
 
-_DEBUG = bool(os.environ.get("MUBADDIL_DEBUG"))
+def _debug_enabled() -> bool:
+    if os.environ.get("MUBADDIL_DEBUG"):
+        return True
+    try:
+        from pathlib import Path
+
+        return (Path.home() / ".mubaddil-debug").exists()
+    except OSError:
+        return False
+
+
+_DEBUG = _debug_enabled()
+
+
+def _guard(fn):
+    """pynput stops the whole listener if a callback raises, so never let one escape."""
+
+    def wrapper(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except Exception as exc:
+            _trace("callback error", fn.__name__, repr(exc))
+            try:
+                from .paths import log_exception
+
+                log_exception(exc)
+            except Exception:
+                pass
+            return None
+
+    wrapper.__name__ = getattr(fn, "__name__", "callback")
+    return wrapper
 
 
 def _trace(*parts) -> None:
@@ -48,11 +79,16 @@ class Watcher:
 
     def start(self) -> None:
         self.listener = keyboard.Listener(
-            on_press=self.on_press, on_release=self.on_release
+            on_press=_guard(self.on_press), on_release=_guard(self.on_release)
         )
-        self.mouse = mouse.Listener(on_click=self.on_click)
+        self.mouse = mouse.Listener(on_click=_guard(self.on_click))
         self.listener.start()
         self.mouse.start()
+        try:
+            self.listener.wait()
+        except Exception:
+            pass
+        _trace("listener started", "running" if self.listener.running else "NOT running")
 
     def stop(self) -> None:
         self._cancel_timers()

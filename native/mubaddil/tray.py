@@ -30,6 +30,21 @@ def run_tray() -> None:
     if "start_with_windows" not in config:
         config["start_with_windows"] = sys.platform.startswith("win")
     config["layout_id"] = ime.detect_layout_id()
+    from . import engine
+    from .hook import _trace
+
+    _trace(
+        "startup",
+        "exe=" + sys.executable,
+        "msix=" + str(is_msix()),
+        "layout=" + str(config.get("layout_id")),
+        "enabled=" + str(config.get("enabled", True)),
+        "config=" + str(ime.config_path()),
+        "hkls=" + ",".join(f"{h & 0xFFFFFFFF:08x}" for h in ime._windows_installed_hkls())
+        if sys.platform.startswith("win")
+        else "",
+    )
+    _trace("dict sizes", {k: len(v) for k, v in vars(engine).items() if isinstance(v, (set, frozenset)) and len(v) > 100})
     watcher = Watcher(config)
     watcher.start()
 
