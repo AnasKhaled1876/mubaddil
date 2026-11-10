@@ -26,24 +26,36 @@ def _debug_enabled() -> bool:
 _DEBUG = _debug_enabled()
 
 
-def _guard(fn):
-    """pynput stops the whole listener if a callback raises, so never let one escape."""
+def _report(name: str, exc: Exception) -> None:
+    _trace("callback error", name, repr(exc))
+    try:
+        from .paths import log_exception
 
-    def wrapper(*args, **kwargs):
+        log_exception(exc)
+    except Exception:
+        pass
+
+
+# pynput stops the whole listener if a callback raises, so never let one escape.
+# Keep exact signatures: pynput inspects arity and passes extra args to *args.
+def _guard_key(fn):
+    def handler(key):
         try:
-            return fn(*args, **kwargs)
+            fn(key)
         except Exception as exc:
-            _trace("callback error", fn.__name__, repr(exc))
-            try:
-                from .paths import log_exception
+            _report(fn.__name__, exc)
 
-                log_exception(exc)
-            except Exception:
-                pass
-            return None
+    return handler
 
-    wrapper.__name__ = getattr(fn, "__name__", "callback")
-    return wrapper
+
+def _guard_click(fn):
+    def handler(x, y, button, pressed):
+        try:
+            fn(x, y, button, pressed)
+        except Exception as exc:
+            _report(fn.__name__, exc)
+
+    return handler
 
 
 def _trace(*parts) -> None:
@@ -79,9 +91,9 @@ class Watcher:
 
     def start(self) -> None:
         self.listener = keyboard.Listener(
-            on_press=_guard(self.on_press), on_release=_guard(self.on_release)
+            on_press=_guard_key(self.on_press), on_release=_guard_key(self.on_release)
         )
-        self.mouse = mouse.Listener(on_click=_guard(self.on_click))
+        self.mouse = mouse.Listener(on_click=_guard_click(self.on_click))
         self.listener.start()
         self.mouse.start()
         try:
