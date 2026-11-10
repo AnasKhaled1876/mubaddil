@@ -88,6 +88,7 @@ class Watcher:
         self.armed_focus: str | None = None
         self.field_done = False
         self.opening_had_separator = False
+        self.on_fix = None
 
     def start(self) -> None:
         self.listener = keyboard.Listener(
@@ -305,6 +306,13 @@ class Watcher:
 
             log_exception(exc)
 
+    def _notify(self) -> None:
+        if self.on_fix:
+            try:
+                self.on_fix(self.last_fix)
+            except Exception:
+                pass
+
     def _wait_for_keys_up(self, timeout: float = 0.4) -> None:
         """Windows drops input we inject while the trigger key is still down."""
         deadline = time.time() + timeout
@@ -359,6 +367,7 @@ class Watcher:
                 "delete_count": len(typed),
             }
             self.field_done = True
+            self._notify()
         finally:
             # Let our own injected keys drain through the hook before listening again.
             time.sleep(0.25)
@@ -386,6 +395,7 @@ class Watcher:
                 ime.set_lang(fix["previous_lang"], self.config.get("layout_id"))
             self.last_fix = None
             self.field_done = True
+            self._notify()
         finally:
             # Let our own injected keys drain through the hook before listening again.
             time.sleep(0.25)

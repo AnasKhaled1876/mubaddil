@@ -324,7 +324,38 @@ def load_config() -> dict:
         return defaults
 
 
-def save_config(config: dict) -> None:
-    path = config_path()
+def _write_json_atomic(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(config, indent=2), encoding="utf-8")
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def save_config(config: dict) -> None:
+    _write_json_atomic(config_path(), config)
+
+
+def update_config(**changes) -> dict:
+    """Merge `changes` into the config on disk (other processes may have changed it)."""
+    config = load_config()
+    config.update(changes)
+    save_config(config)
+    return config
+
+
+def state_path() -> Path:
+    return config_path().with_name("state.json")
+
+
+def save_state(state: dict) -> None:
+    try:
+        _write_json_atomic(state_path(), state)
+    except OSError:
+        pass
+
+
+def load_state() -> dict:
+    try:
+        return json.loads(state_path().read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}

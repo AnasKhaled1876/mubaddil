@@ -61,6 +61,16 @@ $pkg = Get-AppxPackage -Name "8315AnasKhaled.24027DA5D7FEC"
 Write-Host "PACKAGED installed: $($pkg.PackageFullName) at $($pkg.InstallLocation)"
 
 Start-Process "explorer.exe" "shell:AppsFolder\$($pkg.PackageFamilyName)!Mubaddil"
+# Stress: keyboard and mouse input while the app (and WebView2) is still starting.
+$stressEnd = (Get-Date).AddSeconds(10)
+$i = 0
+while ((Get-Date) -lt $stressEnd) {
+    [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point (800 + ($i % 50)), (500 + ($i % 30))
+    [System.Windows.Forms.SendKeys]::SendWait("{SCROLLLOCK}{SCROLLLOCK}")
+    Start-Sleep -Milliseconds 60
+    $i++
+}
+Write-Host "PACKAGED sent $i input bursts during startup"
 $proc = $null
 $deadline = (Get-Date).AddSeconds(60)
 while ((Get-Date) -lt $deadline) {
@@ -102,6 +112,21 @@ if (-not $proc) {
     $typed = Read-Notepad
     Write-Host "PACKAGED Notepad text: [$typed]"
     if ($typed.Trim() -ne "السلام") { $fails += "packaged Notepad produced [$typed]" }
+
+    # Again after the settings window has been polling for a while.
+    Start-Sleep -Seconds 12
+    [System.Windows.Forms.SendKeys]::SendWait("{END}")
+    Click-At ([int](($r.Left + $r.Right) / 2)) ([int](($r.Top + $r.Bottom) / 2) + 40)
+    Start-Sleep -Milliseconds 500
+    [System.Windows.Forms.SendKeys]::SendWait("^a{DEL}")
+    Start-Sleep -Milliseconds 300
+    Click-At ([int](($r.Left + $r.Right) / 2)) ([int](($r.Top + $r.Bottom) / 2))
+    Start-Sleep -Milliseconds 500
+    Type-Slowly "hgsghl "
+    Start-Sleep -Seconds 3
+    $typed2 = Read-Notepad
+    Write-Host "PACKAGED Notepad text (2nd): [$typed2]"
+    if ($typed2.Trim() -ne "السلام") { $fails += "packaged Notepad (2nd) produced [$typed2]" }
     Get-Process notepad -ErrorAction SilentlyContinue | Stop-Process -Force
 }
 

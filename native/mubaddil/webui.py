@@ -52,24 +52,16 @@ def _dark_mode() -> bool:
 
 
 class Api:
-    def __init__(self, config: dict, watcher, on_quit):
-        self._config = config
-        self._watcher = watcher
-        self._on_quit = on_quit
-
-    def _save(self) -> dict:
-        self._watcher.config = self._config
-        ime.save_config(self._config)
-        return self.get_state()
+    """Runs in the separate settings process; talks to the main process via files/events."""
 
     def get_state(self) -> dict:
-        c = self._config
+        c = ime.load_config()
         layouts = [
             {"id": l["id"], "label": l["label"], "label_ar": l["label_ar"]}
             for l in engine.LAYOUTS.values()
             if l.get("device") == ("mac" if sys.platform == "darwin" else "windows")
         ]
-        fix = self._watcher.last_fix
+        fix = ime.load_state().get("last_fix")
         return {
             "enabled": bool(c.get("enabled", True)),
             "lang": c.get("ui_lang") or _system_lang(),
@@ -78,48 +70,49 @@ class Api:
             "start_with_windows": bool(c.get("start_with_windows", True)),
             "msix": is_msix(),
             "layouts": layouts,
-            "last_fix": {"before": fix["before"], "after": fix["after"]} if fix else None,
+            "last_fix": fix if isinstance(fix, dict) and fix.get("before") else None,
         }
 
     def set_enabled(self, value) -> dict:
-        self._config["enabled"] = bool(value)
-        return self._save()
+        ime.update_config(enabled=bool(value))
+        return self.get_state()
 
     def set_layout(self, value) -> dict:
         if value in engine.LAYOUTS:
-            self._config["layout_id"] = value
-        return self._save()
+            ime.update_config(layout_id=value)
+        return self.get_state()
 
     def set_sensitivity(self, value) -> dict:
         if value in {"conservative", "balanced", "aggressive"}:
-            self._config["sensitivity"] = value
-        return self._save()
+            ime.update_config(sensitivity=value)
+        return self.get_state()
 
     def set_lang(self, value) -> dict:
         if value in {"ar", "en"}:
-            self._config["ui_lang"] = value
+            ime.update_config(ui_lang=value)
             window = SESSION.get("window")
             if window:
                 window.set_title("مُبَدِل — Mubaddil" if value == "ar" else "Mubaddil — مُبَدِل")
-        return self._save()
+        return self.get_state()
 
     def set_startup(self, value) -> dict:
-        self._config["start_with_windows"] = bool(value)
+        ime.update_config(start_with_windows=bool(value))
         if not is_msix():
             startup.set_enabled(bool(value))
-        return self._save()
+        return self.get_state()
 
     def open_startup_settings(self) -> None:
         if sys.platform.startswith("win"):
             os.startfile("ms-settings:startupapps")
 
     def hide(self) -> None:
-        window = SESSION.get("window")
-        if window:
-            window.hide()
+        threading.Thread(target=close, daemon=True).start()
 
     def quit(self) -> None:
-        threading.Thread(target=self._on_quit, daemon=True).start()
+        from .instance import QUIT_EVENT, signal_event
+
+        signal_event(QUIT_EVENT)
+        threading.Thread(target=close, daemon=True).start()
 
 
 def show() -> None:
@@ -137,7 +130,6 @@ def show() -> None:
 
 def close() -> None:
     window = SESSION.get("window")
-    SESSION["quitting"] = True
     if window is None:
         return
     try:
@@ -181,34 +173,27 @@ def available() -> bool:
         return False
 
 
-def open_settings(config: dict, watcher, on_quit=None, start_hidden: bool = False) -> None:
-    """Blocks on the UI loop until the window is destroyed (Quit)."""
+def open_settings() -> None:
+    """Settings process entry: blocks until the window closes."""
     import webview
 
+    from .instance import UI_SHOW_EVENT, listen_event
+
+    config = ime.load_config()
     lang = config.get("ui_lang") or _system_lang()
     dark = _dark_mode()
-    api = Api(config, watcher, on_quit or close)
     window = webview.create_window(
         "مُبَدِل — Mubaddil" if lang == "ar" else "Mubaddil — مُبَدِل",
         url=str(_ui_dir() / "index.html"),
-        js_api=api,
+        js_api=Api(),
         width=500,
         height=780,
         min_size=(440, 600),
-        hidden=start_hidden,
         background_color="#121313" if dark else "#f4f4f2",
         text_select=True,
     )
     SESSION["window"] = window
-    SESSION["quitting"] = False
-
-    def on_closing():
-        if SESSION.get("quitting"):
-            return True
-        window.hide()
-        return False
-
-    window.events.closing += on_closing
+    listen_event(UI_SHOW_EVENT, show)
     gui = "edgechromium" if sys.platform.startswith("win") else None
     webview.start(gui=gui, private_mode=True)
     SESSION["window"] = None

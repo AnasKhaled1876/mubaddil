@@ -47,38 +47,45 @@ function Save-Window([IntPtr]$h, [string]$name) {
 
 $exe = Join-Path $Native "dist\Mubaddil\Mubaddil.exe"
 $env:MUBADDIL_DEBUG = "1"
+function Get-UiProcess {
+    Get-Process Mubaddil -ErrorAction SilentlyContinue |
+        Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1
+}
 $proc = Start-Process $exe -PassThru
-$deadline = (Get-Date).AddSeconds(45)
+$ui = $null
+$deadline = (Get-Date).AddSeconds(60)
 while ((Get-Date) -lt $deadline) {
     Start-Sleep -Seconds 1
     $proc.Refresh()
     if ($proc.HasExited) { break }
-    if ($proc.MainWindowHandle -ne [IntPtr]::Zero) { break }
+    $ui = Get-UiProcess
+    if ($ui) { break }
 }
 $log = Join-Path $env:LOCALAPPDATA "Mubaddil\error.log"
 if ($proc.HasExited) {
     if (Test-Path $log) { Get-Content $log }
     throw "Mubaddil exited during startup (code $($proc.ExitCode))."
 }
-if ($proc.MainWindowHandle -eq [IntPtr]::Zero) {
+if (-not $ui) {
     Save-Screen "no-window"
     if (Test-Path $log) { Get-Content $log }
-    throw "Mubaddil started but showed no window within 45s."
+    throw "Mubaddil started but showed no window within 60s."
 }
+Write-Host "Main process $($proc.Id); settings window process $($ui.Id)"
 Start-Sleep -Seconds 3
 (New-Object -ComObject Shell.Application).MinimizeAll()
 Start-Sleep -Seconds 2
 $second0 = Start-Process $exe -PassThru   # brings our window back to the front
 Start-Sleep -Seconds 3
 $proc.Refresh()
-[void][Win]::SetForegroundWindow($proc.MainWindowHandle)
+[void][Win]::SetForegroundWindow((Get-UiProcess).MainWindowHandle)
 Start-Sleep -Seconds 1
 Save-Screen "01-desktop"
-Save-Window $proc.MainWindowHandle "01-window"
+Save-Window (Get-UiProcess).MainWindowHandle "01-window"
 
 # Demo: click into the "try it" box and type Arabic meant as English keys.
 $r = New-Object Win+RECT
-[void][Win]::GetWindowRect($proc.MainWindowHandle, [ref]$r)
+[void][Win]::GetWindowRect((Get-UiProcess).MainWindowHandle, [ref]$r)
 [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point (($r.Left + $r.Right) / 2), ($r.Top + 290)
 Add-Type @"
 using System;
@@ -95,16 +102,16 @@ foreach ($ch in "hgsghl ".ToCharArray()) {
 }
 Start-Sleep -Seconds 3
 Save-Screen "02-desktop"
-Save-Window $proc.MainWindowHandle "02-window"
+Save-Window (Get-UiProcess).MainWindowHandle "02-window"
 
 # Switch the UI to Arabic with the language button (top corner) and capture again.
-[void][Win]::GetWindowRect($proc.MainWindowHandle, [ref]$r)
+[void][Win]::GetWindowRect((Get-UiProcess).MainWindowHandle, [ref]$r)
 [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point ($r.Left + 446), ($r.Top + 74)
 [Mouse]::mouse_event(0x0002, 0, 0, 0, 0); [Mouse]::mouse_event(0x0004, 0, 0, 0, 0)
 Start-Sleep -Seconds 2
 [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point 1500, 900
 Start-Sleep -Milliseconds 500
-Save-Window $proc.MainWindowHandle "04-window-ar"
+Save-Window (Get-UiProcess).MainWindowHandle "04-window-ar"
 
 # Same check in another app: Notepad, read back through the clipboard.
 $np = Start-Process notepad -PassThru
@@ -175,7 +182,7 @@ if (-not $second.HasExited) { throw "Second launch did not hand off to the runni
 $proc.Refresh()
 if ($proc.HasExited) { throw "Running instance died after a second launch." }
 
-Write-Host "Window title: $($proc.MainWindowTitle)"
+Write-Host "Window title: $((Get-UiProcess).MainWindowTitle)"
 Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 1
 Probe-Notepad "app stopped"

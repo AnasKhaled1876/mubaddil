@@ -46,12 +46,16 @@ def run_tray() -> None:
     )
     _trace("dict sizes", {k: len(v) for k, v in vars(engine).items() if isinstance(v, (set, frozenset)) and len(v) > 100})
     watcher = Watcher(config)
+    watcher.on_fix = lambda fix: ime.save_state(
+        {"last_fix": {"before": fix["before"], "after": fix["after"]} if fix else None}
+    )
     watcher.start()
 
     app_icon = {"icon": None}
+    stopped = threading.Event()
 
     def persist() -> None:
-        ime.save_config(config)
+        ime.update_config(enabled=config.get("enabled", True))
         if app_icon["icon"]:
             app_icon["icon"].update_menu()
 
@@ -59,18 +63,17 @@ def run_tray() -> None:
         config["enabled"] = not config.get("enabled", True)
         persist()
 
-    ui = {"module": None}
-
     def quit_app(icon=None, item=None):
+        if stopped.is_set():
+            return
+        stopped.set()
         watcher.stop()
+        _close_settings()
         if app_icon["icon"]:
             app_icon["icon"].stop()
-        if ui["module"] is not None:
-            ui["module"].close()
 
     def open_window(icon=None, item=None):
-        if ui["module"] is not None:
-            ui["module"].show()
+        _open_settings()
 
     menu = pystray.Menu(
         pystray.MenuItem(
@@ -102,53 +105,83 @@ def run_tray() -> None:
         icon.run()
         return
 
-    # Windows: the tray runs on its own thread and the settings window owns the
-    # main thread, so launching the app always shows a real window.
-    from .instance import launched_at_sign_in, listen_for_show_requests
-    from .paths import log_exception
+    # Windows: this process only runs the keyboard hook and the tray. The
+    # settings window is a separate process, so its WebView2/.NET work can never
+    # stall the hook callbacks (Windows silently drops a low-level hook whose
+    # callback is late, and then nothing gets fixed anywhere).
+    from .instance import QUIT_EVENT, launched_at_sign_in, listen_event, listen_for_show_requests
 
-    icon.run_detached()
+    listen_for_show_requests(_open_settings)
+    listen_event(QUIT_EVENT, quit_app)
+    threading.Thread(target=_follow_config, args=(config, watcher, app_icon, stopped), daemon=True).start()
+
     # Start in the tray only for a sign-in launch after the first run; the
     # very first launch always shows the window.
     start_hidden = bool(config.get("window_seen")) and launched_at_sign_in()
-    config["window_seen"] = True
-    ime.save_config(config)
-    listen_for_show_requests(lambda: ui["module"] and ui["module"].show())
-    try:
-        from . import webui
+    ime.update_config(window_seen=True, layout_id=config.get("layout_id"))
+    if not start_hidden:
+        _open_settings()
+    icon.run()
 
-        if os.environ.get("MUBADDIL_TK_UI") or not webui.available():
-            raise RuntimeError("WebView2 UI unavailable")
-        ui["module"] = webui
-        webui.open_settings(config, watcher, on_quit=quit_app, start_hidden=start_hidden)
+
+_settings = {"proc": None}
+
+
+def _settings_command() -> tuple[list[str], str | None]:
+    if getattr(sys, "frozen", False):
+        return [sys.executable, "settings"], None
+    return [sys.executable, "-m", "mubaddil", "settings"], str(Path(__file__).resolve().parents[1])
+
+
+def _open_settings() -> None:
+    from .instance import UI_SHOW_EVENT, signal_event
+
+    proc = _settings.get("proc")
+    if proc is not None and proc.poll() is None:
+        signal_event(UI_SHOW_EVENT)
         return
-    except Exception as exc:  # fall back to the classic Tk window
-        log_exception(exc)
+    import subprocess
+
+    cmd, cwd = _settings_command()
     try:
-        from . import window
+        _settings["proc"] = subprocess.Popen(cmd, cwd=cwd, close_fds=True)
+    except OSError as exc:
+        from .paths import log_exception
 
-        ui["module"] = window
-        window.open_settings(
-            config,
-            watcher,
-            on_quit=quit_app,
-            start_hidden=start_hidden,
-        )
-    except Exception as exc:  # Tk missing or broken: keep working from the tray.
         log_exception(exc)
-        stopped = threading.Event()
-        original_quit = quit_app
 
-        def quit_and_release(icon=None, item=None):
-            original_quit(icon, item)
-            stopped.set()
 
-        icon.menu = pystray.Menu(
-            pystray.MenuItem(
-                "شغّال",
-                set_enabled,
-                checked=lambda item: config.get("enabled", True),
-            ),
-            pystray.MenuItem("خروج — Quit", quit_and_release),
-        )
-        stopped.wait()
+def _close_settings() -> None:
+    proc = _settings.get("proc")
+    if proc is not None and proc.poll() is None:
+        try:
+            proc.terminate()
+        except OSError:
+            pass
+
+
+def _follow_config(config: dict, watcher, app_icon: dict, stopped: threading.Event) -> None:
+    """Pick up changes the settings window writes to config.json."""
+    import time
+
+    path = ime.config_path()
+    last = None
+    while not stopped.is_set():
+        try:
+            mtime = path.stat().st_mtime
+        except OSError:
+            mtime = None
+        if mtime != last:
+            if last is not None:
+                fresh = ime.load_config()
+                for key in ("enabled", "layout_id", "sensitivity"):
+                    if key in fresh:
+                        config[key] = fresh[key]
+                watcher.config = config
+                if app_icon["icon"]:
+                    try:
+                        app_icon["icon"].update_menu()
+                    except Exception:
+                        pass
+            last = mtime
+        time.sleep(0.4)
