@@ -36,3 +36,28 @@ jobs:
             native/dist/Mubaddil.msix
             native/dist/Mubaddil.cer
             native/dist/Install-Sideload.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mubaddil-store
+          path: native/dist/Mubaddil-Store.msix
+
+      - name: Launch the app and capture screenshots
+        shell: pwsh
+        run: ./native/windows/Capture-Screenshots.ps1
+
+      - name: Install the MSIX and test the packaged app
+        if: always()
+        shell: pwsh
+        run: ./native/windows/Test-Packaged.ps1
+
+      - name: Install Setup.exe and test the installed app
+        if: always()
+        shell: pwsh
+        run: ./native/windows/Test-Setup.ps1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Mubaddil-screenshots
+          path: native/dist/screenshots/

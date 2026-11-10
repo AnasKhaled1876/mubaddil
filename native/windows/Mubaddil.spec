@@ -8,12 +8,19 @@ sys.path.insert(0, native_dir)
 
 mubaddil_datas, mubaddil_binaries, mubaddil_hidden = collect_all("mubaddil")
 tk_datas, tk_binaries, tk_hidden = collect_all("tkinter")
+wv_datas, wv_binaries, wv_hidden = collect_all("webview")
+clr_datas, clr_binaries, clr_hidden = collect_all("clr_loader")
+pn_datas, pn_binaries, pn_hidden = collect_all("pythonnet")
 
 hiddenimports = (
     collect_submodules("pynput")
     + collect_submodules("pystray")
     + mubaddil_hidden
     + tk_hidden
+    + wv_hidden
+    + clr_hidden
+    + pn_hidden
+    + ["clr", "mubaddil.webui"]
     + [
         "mubaddil",
         "mubaddil.__main__",
@@ -21,6 +28,8 @@ hiddenimports = (
         "mubaddil.ime",
         "mubaddil.tray",
         "mubaddil.hook",
+        "mubaddil.inject",
+        "mubaddil.instance",
         "mubaddil.window",
         "mubaddil.startup",
         "mubaddil.paths",
@@ -34,9 +43,13 @@ hiddenimports = (
 a = Analysis(
     [os.path.join(SPECPATH, "launch.py")],
     pathex=[native_dir],
-    binaries=mubaddil_binaries + tk_binaries,
+    binaries=mubaddil_binaries + tk_binaries + wv_binaries + clr_binaries + pn_binaries,
     datas=mubaddil_datas
     + tk_datas
+    + wv_datas
+    + clr_datas
+    + pn_datas
+    + [(os.path.join(native_dir, "mubaddil", "ui"), "mubaddil/ui")]
     + [(os.path.join(native_dir, "assets", "icon.png"), "assets")]
     + [(os.path.join(native_dir, "mubaddil", "data"), "mubaddil/data")],
     hiddenimports=hiddenimports,
@@ -56,7 +69,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     console=False,
     icon=os.path.join(native_dir, "assets", "icon.ico"),
 )
@@ -65,6 +78,6 @@ coll = COLLECT(
     a.binaries,
     a.datas,
     strip=False,
-    upx=True,
+    upx=False,
     name="Mubaddil",
 )

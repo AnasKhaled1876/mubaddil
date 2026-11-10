@@ -59,11 +59,20 @@ if (Test-Path $msix) { Remove-Item $msix -Force }
 
 Write-Host "Packing MSIX..."
 & $makeappx pack /d $pkg /p $msix /o
+if ($LASTEXITCODE -ne 0) { throw "makeappx failed with exit code $LASTEXITCODE" }
+
+# Microsoft Store upload: unsigned. Partner Center signs it with the Store cert.
+$storeMsix = Join-Path $Native "dist\Mubaddil-Store.msix"
+Copy-Item $msix $storeMsix -Force
+
+# Sideload copy: self-signed with the same Publisher the manifest declares.
+[xml]$manifestXml = Get-Content (Join-Path $pkg "AppxManifest.xml") -Encoding UTF8
+$publisher = $manifestXml.Package.Identity.Publisher
 
 $cer = Join-Path $Native "dist\Mubaddil.cer"
 $pfx = Join-Path $env:TEMP "Mubaddil.pfx"
 $pass = ConvertTo-SecureString "mubaddil" -AsPlainText -Force
-$cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=Mubaddil" `
+$cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject $publisher `
     -KeyUsage DigitalSignature -FriendlyName "Mubaddil" `
     -CertStoreLocation "Cert:\CurrentUser\My"
 Export-PfxCertificate -Cert $cert -FilePath $pfx -Password $pass | Out-Null
@@ -76,6 +85,7 @@ Copy-Item (Join-Path $PSScriptRoot "Install-Sideload.ps1") (Join-Path $Native "d
 
 Write-Host ""
 Write-Host "Built:"
+Write-Host "  $storeMsix  (upload this to Partner Center)"
 Write-Host "  $msix"
 Write-Host "  $cer"
 Write-Host "On the boss PC: run Install-Sideload.ps1 from the same folder, or enable Developer Mode and double-click the MSIX."

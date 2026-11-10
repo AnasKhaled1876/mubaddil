@@ -6,19 +6,19 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap uap5 rescap">
   <Identity
-    Name="Mubaddil.KeyboardFix"
-    Publisher="CN=Mubaddil"
-    Version="0.1.0.0"
+    Name="8315AnasKhaled.24027DA5D7FEC"
+    Publisher="CN=493A811D-82C8-4C71-81B7-D167813C145B"
+    Version="1.0.1.0"
     ProcessorArchitecture="x64" />
   <Properties>
-    <DisplayName>مبدّل</DisplayName>
-    <PublisherDisplayName>Mubaddil</PublisherDisplayName>
+    <DisplayName>مُبَدِل</DisplayName>
+    <PublisherDisplayName>Anas Khaled</PublisherDisplayName>
     <Description>Fixes typing in the wrong Arabic/English keyboard layout on the whole PC.</Description>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Resources>
     <Resource Language="en-us" />
-    <Resource Language="ar-sa" />
+    <Resource Language="ar" />
   </Resources>
   <Dependencies>
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
@@ -32,9 +32,9 @@
       Executable="Mubaddil.exe"
       EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="مبدّل"
+        DisplayName="مُبَدِل"
         Description="Stops you when the keyboard language is wrong, remaps the keys, and switches the layout."
-        BackgroundColor="#f3eadb"
+        BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
         <uap:DefaultTile
@@ -47,7 +47,7 @@
           <uap5:StartupTask
             TaskId="MubaddilStartup"
             Enabled="true"
-            DisplayName="مبدّل" />
+            DisplayName="مُبَدِل" />
         </uap5:Extension>
       </Extensions>
     </Application>

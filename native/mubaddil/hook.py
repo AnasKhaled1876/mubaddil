@@ -1,12 +1,73 @@
+import os
 import threading
 import time
 
 from pynput import keyboard, mouse
 
-from . import engine, ime
+from . import engine, ime, inject
 
 SEPARATOR_CHARS = set(" \t!?()<>")
 MAX_OPENING_WORDS = 2
+# Shortest word each sensitivity level will convert.
+SENSITIVITY_MIN_LENGTH = {"conservative": 4, "balanced": 3, "aggressive": 2}
+
+
+def _debug_enabled() -> bool:
+    if os.environ.get("MUBADDIL_DEBUG"):
+        return True
+    try:
+        from pathlib import Path
+
+        return (Path.home() / ".mubaddil-debug").exists()
+    except OSError:
+        return False
+
+
+_DEBUG = _debug_enabled()
+
+
+def _report(name: str, exc: Exception) -> None:
+    _trace("callback error", name, repr(exc))
+    try:
+        from .paths import log_exception
+
+        log_exception(exc)
+    except Exception:
+        pass
+
+
+# pynput stops the whole listener if a callback raises, so never let one escape.
+# Keep exact signatures: pynput inspects arity and passes extra args to *args.
+def _guard_key(fn):
+    def handler(key):
+        try:
+            fn(key)
+        except Exception as exc:
+            _report(fn.__name__, exc)
+
+    return handler
+
+
+def _guard_click(fn):
+    def handler(x, y, button, pressed):
+        try:
+            fn(x, y, button, pressed)
+        except Exception as exc:
+            _report(fn.__name__, exc)
+
+    return handler
+
+
+def _trace(*parts) -> None:
+    if not _DEBUG:
+        return
+    try:
+        from .paths import log_file
+
+        with open(log_file().with_name("debug.log"), "a", encoding="utf-8") as fh:
+            fh.write(f"{time.time():.3f} " + " ".join(str(p) for p in parts) + "\n")
+    except OSError:
+        pass
 
 
 class Watcher:
@@ -21,19 +82,26 @@ class Watcher:
         self._idle: threading.Timer | None = None
         self._pending: threading.Timer | None = None
         self._modifiers = set()
+        self._held = set()
         self.last_fix: dict | None = None
         self.lock = threading.Lock()
         self.armed_focus: str | None = None
         self.field_done = False
         self.opening_had_separator = False
+        self.on_fix = None
 
     def start(self) -> None:
         self.listener = keyboard.Listener(
-            on_press=self.on_press, on_release=self.on_release
+            on_press=_guard_key(self.on_press), on_release=_guard_key(self.on_release)
         )
-        self.mouse = mouse.Listener(on_click=self.on_click)
+        self.mouse = mouse.Listener(on_click=_guard_click(self.on_click))
         self.listener.start()
         self.mouse.start()
+        try:
+            self.listener.wait()
+        except Exception:
+            pass
+        _trace("listener started", "running" if self.listener.running else "NOT running")
 
     def stop(self) -> None:
         self._cancel_timers()
@@ -65,8 +133,10 @@ class Watcher:
 
     def on_release(self, key) -> None:
         self._modifiers.discard(key)
+        self._held.discard(key)
 
     def _rearm_field(self) -> None:
+        _trace("rearm")
         self.armed_focus = ime.focus_token()
         self.field_done = False
         self.opening_words = []
@@ -93,8 +163,10 @@ class Watcher:
         self._cancel_timers()
 
     def on_press(self, key) -> None:
+        _trace("press", repr(key), "injecting" if self.injecting else "", "done" if self.field_done else "", "buf=" + "".join(self.buffer))
         if self.injecting:
             return
+        self._held.add(key)
         if key in {
             keyboard.Key.cmd,
             keyboard.Key.cmd_l,
@@ -109,6 +181,10 @@ class Watcher:
             self._modifiers.add(key)
             return
 
+        if self._is_undo(key):
+            self.undo()
+            return
+
         self._refresh_field()
 
         if key == keyboard.Key.tab:
@@ -116,8 +192,6 @@ class Watcher:
             return
 
         if self._mods_blocking():
-            if self._is_undo(key):
-                self.undo()
             self.buffer.clear()
             self._cancel_timers()
             return
@@ -160,7 +234,8 @@ class Watcher:
 
     def _is_undo(self, key) -> bool:
         ch = getattr(key, "char", None)
-        return ch in {"z", "Z"} and bool(
+        is_z = ch in {"z", "Z"} or getattr(key, "vk", None) == 0x5A
+        return is_z and bool(
             self._modifiers
             & {
                 keyboard.Key.alt,
@@ -206,9 +281,13 @@ class Watcher:
             words,
             layout_id,
             {
-                "min_length": self.config.get("min_length", 3),
+                "min_length": SENSITIVITY_MIN_LENGTH.get(
+                    self.config.get("sensitivity", "balanced"),
+                    self.config.get("min_length", 3),
+                ),
             },
         )
+        _trace("decision", words, layout_id, decision)
         if not decision.get("convert"):
             if wait_for_more:
                 return
@@ -220,6 +299,32 @@ class Watcher:
         self._pending.start()
 
     def _apply(self, decision: dict, had_separator: bool) -> None:
+        try:
+            self._apply_inner(decision, had_separator)
+        except Exception as exc:
+            from .paths import log_exception
+
+            log_exception(exc)
+
+    def _notify(self) -> None:
+        if self.on_fix:
+            try:
+                self.on_fix(self.last_fix)
+            except Exception:
+                pass
+
+    def _wait_for_keys_up(self, timeout: float = 0.4) -> None:
+        """Windows drops input we inject while the trigger key is still down."""
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            held = {k for k in self._held if k not in self._modifiers}
+            if not held:
+                break
+            time.sleep(0.01)
+        time.sleep(0.03)
+
+    def _apply_inner(self, decision: dict, had_separator: bool) -> None:
+        self._wait_for_keys_up()
         with self.lock:
             if self.field_done:
                 return
@@ -252,11 +357,7 @@ class Watcher:
         )
         self.injecting = True
         try:
-            for _ in range(delete_count):
-                self.controller.press(keyboard.Key.backspace)
-                self.controller.release(keyboard.Key.backspace)
-                time.sleep(0.001)
-            self.controller.type(typed)
+            inject.replace(self.controller, delete_count, typed)
             ime.set_lang(target, self.config.get("layout_id"))
             self.last_fix = {
                 "before": original,
@@ -266,27 +367,36 @@ class Watcher:
                 "delete_count": len(typed),
             }
             self.field_done = True
+            self._notify()
         finally:
-            time.sleep(0.05)
+            # Let our own injected keys drain through the hook before listening again.
+            time.sleep(0.25)
             self.injecting = False
 
     def undo(self) -> None:
         fix = self.last_fix
         if not fix or self.injecting:
             return
+        threading.Thread(target=self._undo_after_release, args=(fix,), daemon=True).start()
+
+    def _undo_after_release(self, fix: dict) -> None:
+        deadline = time.time() + 1.0
+        while self._modifiers and time.time() < deadline:
+            time.sleep(0.01)
+        self._wait_for_keys_up()
+        if self.injecting or self.last_fix is not fix:
+            return
         self.injecting = True
         try:
-            for _ in range(fix["delete_count"]):
-                self.controller.press(keyboard.Key.backspace)
-                self.controller.release(keyboard.Key.backspace)
-                time.sleep(0.001)
             extra_space = fix["after"].endswith(" ") and not fix["before"].endswith(" ")
             restore = fix["before"] + (" " if extra_space else "")
-            self.controller.type(restore)
+            inject.replace(self.controller, fix["delete_count"], restore)
             if fix.get("previous_lang"):
                 ime.set_lang(fix["previous_lang"], self.config.get("layout_id"))
             self.last_fix = None
             self.field_done = True
+            self._notify()
         finally:
-            time.sleep(0.05)
+            # Let our own injected keys drain through the hook before listening again.
+            time.sleep(0.25)
             self.injecting = False

@@ -24,8 +24,8 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     for name, size in SIZES.items():
         if isinstance(size, tuple):
-            canvas = Image.new("RGBA", size, (243, 234, 219, 255))
-            side = min(size) - 24
+            canvas = Image.new("RGBA", size, (0, 0, 0, 0))
+            side = min(size) - 40
             tile = image.resize((side, side), Image.Resampling.LANCZOS)
             canvas.paste(tile, ((size[0] - side) // 2, (size[1] - side) // 2), tile)
             canvas.save(OUT / name)
